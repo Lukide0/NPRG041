@@ -2,7 +2,6 @@
 #define KOTERM_SCREEN_COLORS_H
 
 #include "koterm/screen/Color.h"
-#include "koterm/screen/ColorCache.h"
 
 #define DEFINE_SYS_COLOR(name, id) constexpr auto SYS_##name = Color::from_id(id)
 
@@ -26,8 +25,6 @@ DEFINE_SYS_COLOR(BRIGHT_BLUE, 94);
 DEFINE_SYS_COLOR(BRIGHT_MAGENTA, 95);
 DEFINE_SYS_COLOR(BRIGHT_CYAN, 96);
 DEFINE_SYS_COLOR(BRIGHT_WHITE, 97);
-
-static const ColorCache::id_t g_system_default = ColorCache::add_color(SYS_DEFAULT);
 
 }
 

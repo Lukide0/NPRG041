@@ -1,7 +1,7 @@
 #ifndef KOTERM_SCREEN_PIXEL
 #define KOTERM_SCREEN_PIXEL
 
-#include "koterm/screen/ColorCache.h"
+#include "koterm/screen/Color.h"
 #include "koterm/util/bits.h"
 #include <cstdint>
 #include <string>
@@ -47,8 +47,8 @@ struct PixelContent {
 };
 
 struct PixelColor {
-    ColorCache::id_t bg;
-    ColorCache::id_t fg;
+    Color::color_id bg;
+    Color::color_id fg;
 };
 
 }

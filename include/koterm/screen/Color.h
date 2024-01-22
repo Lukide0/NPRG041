@@ -3,14 +3,16 @@
 
 #include <cassert>
 #include <cstdint>
+#include <limits>
 #include <string_view>
 namespace koterm::screen {
 
 class Color {
 public:
-    using value_t = std::uint8_t;
+    using value_t  = std::uint8_t;
+    using color_id = std::uint32_t;
 
-    enum class Type {
+    enum class Type : value_t {
         RGB,
         SYSTEM,
     };
@@ -56,7 +58,23 @@ public:
         m_b = blue;
     }
 
+    static constexpr Color from_id(color_id id) {
+        constexpr value_t MASK = std::numeric_limits<value_t>::max();
+
+        const value_t red   = id & MASK;
+        const value_t green = (id >> (sizeof(value_t) * 8 * 1)) & MASK;
+        const value_t blue  = (id >> (sizeof(value_t) * 8 * 2)) & MASK;
+        const Type type     = static_cast<Type>((id >> (sizeof(value_t) * 8 * 3)) & MASK);
+
+        return { red, green, blue, type };
+    }
     [[nodiscard]] constexpr value_t code() const { return m_r; }
+    [[nodiscard]] constexpr color_id id() const {
+        color_id id = m_r | (m_g << (sizeof(value_t) * 8)) | (m_b << (sizeof(value_t) * 8 * 2))
+            | (static_cast<value_t>(m_type) << (sizeof(value_t) * 8 * 3));
+        return id;
+    }
+
     [[nodiscard]] constexpr value_t red() const { return m_r; }
     [[nodiscard]] constexpr value_t green() const { return m_g; }
     [[nodiscard]] constexpr value_t blue() const { return m_b; }
@@ -121,12 +139,18 @@ public:
     }
 
     static constexpr Color from_rgb(value_t r, value_t g, value_t b) { return { r, g, b }; }
-    static constexpr Color from_id(value_t id) { return { id }; }
+    static constexpr Color from_code(value_t code) { return { code }; }
     static consteval Color from_hex(std::string_view hex) { return { hex }; }
 
     [[nodiscard]] constexpr Type type() const { return m_type; }
 
 private:
+    constexpr Color(value_t red, value_t green, value_t blue, Type type)
+        : m_type(type)
+        , m_r(red)
+        , m_g(green)
+        , m_b(blue) { }
+
     static constexpr std::uint8_t extract_value(char val) {
         if ('a' <= val && val <= 'f') {
             return 10 + val - 'a';

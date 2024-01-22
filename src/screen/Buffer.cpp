@@ -26,7 +26,7 @@ Buffer::Buffer(unit_t width, unit_t height)
     for (std::size_t i = 0; i < size; i++) {
         m_pixels_style.emplace_back();
         m_pixels_content.emplace_back();
-        m_pixels_color.emplace_back(colors::g_system_default, colors::g_system_default);
+        m_pixels_color.emplace_back(colors::SYS_DEFAULT.id(), colors::SYS_DEFAULT.id());
         m_tiles.emplace_back(0, 0, 0, 0);
     }
 }
@@ -61,7 +61,7 @@ void Buffer::clear_rect(BoundingBox rect) {
             const std::size_t index = row_index + x;
 
             m_pixels_style[index]           = {};
-            m_pixels_color[index]           = { colors::g_system_default, colors::g_system_default };
+            m_pixels_color[index]           = { colors::SYS_DEFAULT.id(), colors::SYS_DEFAULT.id() };
             m_pixels_content[index].content = ' ';
             m_tiles[index].encoding         = TileEncoding::NONE;
         }
@@ -71,7 +71,7 @@ void Buffer::clear_rect(BoundingBox rect) {
 void Buffer::flush(std::ostream& stream) const {
 
     PixelStyle prev_style;
-    PixelColor prev_color = { colors::g_system_default, colors::g_system_default };
+    PixelColor prev_color = { colors::SYS_DEFAULT.id(), colors::SYS_DEFAULT.id() };
 
     for (unit_t y = 0; y < m_height; y++) {
         const std::size_t row_index = static_cast<std::size_t>(y) * m_width;
@@ -86,11 +86,11 @@ void Buffer::flush(std::ostream& stream) const {
             }
 
             if (pixel_color.bg != prev_color.bg) {
-                write_color<true>(ColorCache::get_color(pixel_color.bg), stream);
+                write_color<true>(Color::from_id(pixel_color.bg));
             }
 
             if (pixel_color.fg != prev_color.fg) {
-                write_color<false>(ColorCache::get_color(pixel_color.fg), stream);
+                write_color<false>(Color::from_id(pixel_color.fg));
             }
 
             stream << m_pixels_content.at(index).content;
@@ -104,86 +104,57 @@ void Buffer::flush(std::ostream& stream) const {
     stream.flush();
 }
 
-bool Buffer::set_pixel_style(PixelStyle style, unit_t x, unit_t y) {
-    if (!m_box.contains(x, y)) {
-        return false;
-    }
+void Buffer::set_pixel_style(PixelStyle style, unit_t x, unit_t y) {
+    assert(m_box.contains(x, y));
 
     std::size_t index     = to_index(x, y);
     m_pixels_style[index] = style;
-
-    return true;
 }
 
-bool Buffer::set_pixel_background(ColorCache::id_t background, unit_t x, unit_t y) {
-    if (!m_box.contains(x, y)) {
-        return false;
-    }
+void Buffer::set_pixel_background(Color::color_id background, unit_t x, unit_t y) {
+    assert(m_box.contains(x, y));
 
     std::size_t index        = to_index(x, y);
     m_pixels_color[index].bg = background;
-
-    return true;
 }
 
-bool Buffer::set_pixel_foreground(ColorCache::id_t foreground, unit_t x, unit_t y) {
-    if (!m_box.contains(x, y)) {
-        return false;
-    }
+void Buffer::set_pixel_foreground(Color::color_id foreground, unit_t x, unit_t y) {
+    assert(m_box.contains(x, y));
 
     std::size_t index        = to_index(x, y);
     m_pixels_color[index].fg = foreground;
-
-    return true;
 }
 
-bool Buffer::set_pixel_color(ColorCache::id_t background, ColorCache::id_t foreground, unit_t x, unit_t y) {
-    if (!m_box.contains(x, y)) {
-        return false;
-    }
+void Buffer::set_pixel_color(Color::color_id background, Color::color_id foreground, unit_t x, unit_t y) {
+    assert(m_box.contains(x, y));
 
     std::size_t index     = to_index(x, y);
     m_pixels_color[index] = { .bg = background, .fg = foreground };
-
-    return true;
 }
 
-bool Buffer::set_pixel_content(PixelContent content, unit_t x, unit_t y) {
-    if (!m_box.contains(x, y)) {
-        return false;
-    }
+void Buffer::set_pixel_content(PixelContent content, unit_t x, unit_t y) {
+    assert(m_box.contains(x, y));
 
     std::size_t index       = to_index(x, y);
     m_pixels_content[index] = content;
     m_tiles[index].encoding = TileEncoding::NONE;
-
-    return true;
 }
 
-bool Buffer::set_pixel_content(TileEncoding tile, unit_t x, unit_t y) {
-    if (!m_box.contains(x, y)) {
-        return false;
-    }
+void Buffer::set_pixel_content(TileEncoding tile, unit_t x, unit_t y) {
+    assert(m_box.contains(x, y));
 
     std::size_t index       = to_index(x, y);
     m_tiles[index]          = tile;
     m_pixels_content[index] = TILES_MAP.at(tile);
-
-    return true;
 }
 
-bool Buffer::combine_tile(TileEncoding tile, unit_t x, unit_t y) {
-    if (!m_box.contains(x, y)) {
-        return false;
-    }
+void Buffer::combine_tile(TileEncoding tile, unit_t x, unit_t y) {
+    assert(m_box.contains(x, y));
 
-    std::size_t index = to_index(x, y);
-    auto& buffer_tile = m_tiles[index];
-    buffer_tile       = buffer_tile.combine(tile);
-
+    std::size_t index       = to_index(x, y);
+    auto& buffer_tile       = m_tiles[index];
+    buffer_tile             = buffer_tile.combine(tile);
     m_pixels_content[index] = TILES_MAP.at(buffer_tile);
-
-    return true;
 }
 
 template <bool IS_BACKGROUND> void write_color(const Color& color, std::ostream& stream) {

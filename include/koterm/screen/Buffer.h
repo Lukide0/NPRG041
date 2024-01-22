@@ -3,7 +3,6 @@
 
 #include "Pixel.h"
 #include "koterm/screen/BoundingBox.h"
-#include "koterm/screen/ColorCache.h"
 #include "koterm/screen/Tile.h"
 #include "koterm/screen/colors.h"
 #include "unit.h"
@@ -21,15 +20,15 @@ public:
     void clear() { clear_rect({ m_width - 1, m_height - 1 }); }
     void clear_rect(BoundingBox rect);
 
-    bool set_pixel_style(PixelStyle style, unit_t x, unit_t y);
-    bool set_pixel_background(ColorCache::id_t background, unit_t x, unit_t y);
-    bool set_pixel_foreground(ColorCache::id_t foreground, unit_t x, unit_t y);
-    bool set_pixel_color(ColorCache::id_t background, ColorCache::id_t foreground, unit_t x, unit_t y);
+    void set_pixel_style(PixelStyle style, unit_t x, unit_t y);
+    void set_pixel_background(Color::color_id background, unit_t x, unit_t y);
+    void set_pixel_foreground(Color::color_id foreground, unit_t x, unit_t y);
+    void set_pixel_color(Color::color_id background, Color::color_id foreground, unit_t x, unit_t y);
 
-    bool set_pixel_content(PixelContent content, unit_t x, unit_t y);
-    bool set_pixel_content(TileEncoding tile, unit_t x, unit_t y);
+    void set_pixel_content(PixelContent content, unit_t x, unit_t y);
+    void set_pixel_content(TileEncoding tile, unit_t x, unit_t y);
 
-    bool combine_tile(TileEncoding tile, unit_t x, unit_t y);
+    void combine_tile(TileEncoding tile, unit_t x, unit_t y);
 
     [[nodiscard]] PixelStyle get_pixel_style(unit_t x, unit_t y) const;
     [[nodiscard]] PixelContent get_pixel_content(unit_t x, unit_t y) const;
