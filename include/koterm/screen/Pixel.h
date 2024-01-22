@@ -30,7 +30,7 @@ public:
 
     auto operator<=>(const PixelStyle&) const = default;
 
-    void write(std::ostream& stream, PixelStyle previous) const;
+    void write(PixelStyle previous) const;
 
 private:
     storage_t m_style = bits::BITS_NONE;

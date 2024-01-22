@@ -8,7 +8,17 @@
 
 namespace koterm::screen {
 
-template <bool IS_BACKGROUND> void write_color(const Color& color, std::ostream& stream);
+template <bool IS_BACKGROUND> inline void write_color(const Color& color) {
+    switch (color.type()) {
+    case Color::Type::RGB:
+        std::cout << ansi::CSI << ((IS_BACKGROUND) ? "48;2;" : "38;2;") << static_cast<int>(color.red()) << ';'
+                  << static_cast<int>(color.green()) << ';' << static_cast<int>(color.blue()) << 'm';
+        break;
+    case Color::Type::SYSTEM:
+        std::cout << ansi::CSI << ((IS_BACKGROUND) ? color.code() + 10 : color.code()) << 'm';
+        break;
+    }
+}
 
 Buffer::Buffer(unit_t width, unit_t height)
     : m_width(width)
@@ -68,7 +78,7 @@ void Buffer::clear_rect(BoundingBox rect) {
     }
 }
 
-void Buffer::flush(std::ostream& stream) const {
+void Buffer::flush() const {
 
     PixelStyle prev_style;
     PixelColor prev_color = { colors::SYS_DEFAULT.id(), colors::SYS_DEFAULT.id() };
@@ -82,7 +92,7 @@ void Buffer::flush(std::ostream& stream) const {
             const auto pixel_color  = m_pixels_color.at(index);
 
             if (pixel_style != prev_style) {
-                pixel_style.write(stream, prev_style);
+                pixel_style.write(prev_style);
             }
 
             if (pixel_color.bg != prev_color.bg) {
@@ -92,16 +102,15 @@ void Buffer::flush(std::ostream& stream) const {
             if (pixel_color.fg != prev_color.fg) {
                 write_color<false>(Color::from_id(pixel_color.fg));
             }
-
-            stream << m_pixels_content.at(index).content;
+            std::cout << m_pixels_content.at(index).content;
             prev_style = pixel_style;
             prev_color = pixel_color;
         }
 
-        stream << "\r\n";
+        std::cout << ansi::STYLE_RESET << "\r\n";
     }
 
-    stream.flush();
+    std::cout.flush();
 }
 
 void Buffer::set_pixel_style(PixelStyle style, unit_t x, unit_t y) {
@@ -157,15 +166,4 @@ void Buffer::combine_tile(TileEncoding tile, unit_t x, unit_t y) {
     m_pixels_content[index] = TILES_MAP.at(buffer_tile);
 }
 
-template <bool IS_BACKGROUND> void write_color(const Color& color, std::ostream& stream) {
-    switch (color.type()) {
-    case Color::Type::RGB:
-        stream << ansi::CSI << ((IS_BACKGROUND) ? "48;2;" : "38;2;") << color.red() << ';' << color.green() << ';'
-               << color.blue() << 'm';
-        break;
-    case Color::Type::SYSTEM:
-        stream << ansi::CSI << ((IS_BACKGROUND) ? color.code() + 10 : color.code()) << 'm';
-        break;
-    }
-}
 }

@@ -15,7 +15,7 @@ public:
     Buffer(unit_t width, unit_t height);
     void resize(unit_t width, unit_t height);
 
-    void flush(std::ostream& stream) const;
+    void flush() const;
 
     void clear() { clear_rect({ m_width - 1, m_height - 1 }); }
     void clear_rect(BoundingBox rect);
