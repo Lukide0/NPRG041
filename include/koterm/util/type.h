@@ -1,6 +1,7 @@
 #ifndef KOTERM_UTIL_TYPE_H
 #define KOTERM_UTIL_TYPE_H
 
+#include "koterm/util/debug.h"
 #include <concepts>
 #include <type_traits>
 namespace koterm::util {
@@ -55,6 +56,8 @@ concept enum_type = std::is_enum_v<T>;
 template <enum_type T> constexpr std::underlying_type_t<T> to_underlying_type(T value) {
     return static_cast<std::underlying_type_t<T>>(value);
 }
+
+template <typename Iftrue, typename Iffalse> using debug_type = std::conditional_t<debug_mode(), Iftrue, Iffalse>;
 
 }
 
