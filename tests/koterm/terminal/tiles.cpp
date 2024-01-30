@@ -1,8 +1,8 @@
 #include "utils.h"
 #include <doctest.h>
-#include <koterm/screen/Tile.h>
+#include <koterm/terminal/Tile.h>
 
-using namespace koterm::screen;
+using namespace koterm::terminal;
 
 TEST_CASE("Tiles: Simple combine") {
 

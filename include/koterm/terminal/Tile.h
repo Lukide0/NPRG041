@@ -1,5 +1,5 @@
-#ifndef KOTERM_SCREEN_TILE_H
-#define KOTERM_SCREEN_TILE_H
+#ifndef KOTERM_TERMINAL_TILE_H
+#define KOTERM_TERMINAL_TILE_H
 
 #include "koterm/util/ConstMap.h"
 #include <cassert>
@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <string_view>
 
-namespace koterm::screen {
+namespace koterm::terminal {
 
 struct TileEncoding {
 private:

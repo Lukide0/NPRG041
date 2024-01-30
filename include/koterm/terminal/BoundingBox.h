@@ -1,9 +1,9 @@
-#ifndef KOTERM_SCREEN_BOUNDINGBOX_H
-#define KOTERM_SCREEN_BOUNDINGBOX_H
+#ifndef KOTERM_TERMINAL_BOUNDINGBOX_H
+#define KOTERM_TERMINAL_BOUNDINGBOX_H
 
-#include "koterm/screen/unit.h"
+#include "koterm/terminal/unit.h"
 #include "koterm/util/range.h"
-namespace koterm::screen {
+namespace koterm::terminal {
 
 /**
  * @brief BoundingBox structure representing a rectangular region.

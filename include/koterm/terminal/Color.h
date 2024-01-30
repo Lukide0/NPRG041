@@ -1,11 +1,11 @@
-#ifndef KOTERM_SCREEN_COLOR_H
-#define KOTERM_SCREEN_COLOR_H
+#ifndef KOTERM_TERMINAL_COLOR_H
+#define KOTERM_TERMINAL_COLOR_H
 
 #include <cassert>
 #include <cstdint>
 #include <limits>
 #include <string_view>
-namespace koterm::screen {
+namespace koterm::terminal {
 
 class Color {
 public:

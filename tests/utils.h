@@ -2,9 +2,11 @@
 #define KOTERM_TESTS_UTILS_H
 
 #include <algorithm>
+#include <array>
 #include <string>
 
 #include <doctest.h>
+#include <utility>
 
 #define KOTERM_TEST_GENERATOR(data, min, max)                                                                       \
     for (std::size_t _i = min; _i < max; ++_i) {                                                                    \
@@ -19,5 +21,15 @@
             _i++;                                                                                              \
         }                                                                                                      \
     }
+
+namespace detail {
+template <typename T, std::size_t N, std::size_t... I> constexpr auto create_sequence_impl(std::index_sequence<I...>) {
+    return std::array<T, N> { { I... } };
+}
+}
+
+template <typename T, std::size_t N> constexpr auto create_sequence() {
+    return detail::create_sequence_impl<T, N>(std::make_index_sequence<N> {});
+}
 
 #endif

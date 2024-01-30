@@ -5,7 +5,7 @@ include(${PROJECT_SOURCE_DIR}/cmake/create_test.cmake)
 create_test(
   "tiles"
   FILES
-  koterm/screen/tiles.cpp
+  koterm/terminal/tiles.cpp
   LIBS
   ${LIBRARY_NAME}
   NO_EXCEPTIONS

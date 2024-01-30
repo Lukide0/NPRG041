@@ -1,3 +1,3 @@
-add_subdirectory(screen)
+add_subdirectory(terminal)
 
 # target_sources(${LIBRARY_NAME} )

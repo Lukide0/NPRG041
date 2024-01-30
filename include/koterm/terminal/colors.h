@@ -1,11 +1,11 @@
-#ifndef KOTERM_SCREEN_COLORS_H
-#define KOTERM_SCREEN_COLORS_H
+#ifndef KOTERM_TERMINAL_COLORS_H
+#define KOTERM_TERMINAL_COLORS_H
 
-#include "koterm/screen/Color.h"
+#include "koterm/terminal/Color.h"
 
 #define DEFINE_SYS_COLOR(name, id) constexpr auto SYS_##name = Color::from_id(id)
 
-namespace koterm::screen::colors {
+namespace koterm::terminal::colors {
 
 DEFINE_SYS_COLOR(BLACK, 30);
 DEFINE_SYS_COLOR(RED, 31);

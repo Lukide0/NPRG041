@@ -1,8 +1,8 @@
-#include "koterm/screen/Pixel.h"
-#include "koterm/screen/ansi.h"
+#include "koterm/terminal/Pixel.h"
+#include "koterm/terminal/ansi.h"
 #include <iostream>
 
-namespace koterm::screen {
+namespace koterm::terminal {
 
 void PixelStyle::write(PixelStyle previous) const {
     if (previous == *this) {

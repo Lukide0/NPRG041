@@ -1,14 +1,17 @@
-#ifndef KOTERM_SCREEN_ANSI_H
-#define KOTERM_SCREEN_ANSI_H
+#ifndef KOTERM_TERMINAL_ANSI_H
+#define KOTERM_TERMINAL_ANSI_H
 
+#include <ostream>
+#include <string>
 #include <string_view>
 
 #define ESC_CODE "\x1B"
 #define CSI_CODE ESC_CODE "["
 
-namespace koterm::screen::ansi {
+namespace koterm::terminal::ansi {
 
 constexpr std::string_view ESC = ESC_CODE;
+constexpr int PREFIX_CODE      = '\x1B';
 constexpr std::string_view CSI = CSI_CODE;
 
 // Common Private Modes
@@ -30,6 +33,27 @@ enum class Features {
 
     ALTERNATIVE_SCREEN = 1049,
 };
+
+constexpr std::string_view CURSOR_QUERY     = CSI_CODE "6n";
+constexpr std::string_view CURSOR_TO_ORIGIN = CSI_CODE "H";
+constexpr std::string_view CURSOR_SAVE      = CSI_CODE "7";
+constexpr std::string_view CURSOR_RESTORE   = CSI_CODE "8";
+
+constexpr std::string_view ERASE_FROM_CURSOR_TO_SCREEN_END      = CSI_CODE "0J";
+constexpr std::string_view ERASE_TO_CURSOR                      = CSI_CODE "1J";
+constexpr std::string_view ERASE_SCREEN                         = CSI_CODE "2J";
+constexpr std::string_view ERASE_FROM_CURSOR_TO_LINE_END        = CSI_CODE "0K";
+constexpr std::string_view ERASE_FROM_START_LINE_TO_CURSOR_LINE = CSI_CODE "1K";
+constexpr std::string_view ERASE_LINE                           = CSI_CODE "2K";
+
+inline void move_cursor(unsigned int row, unsigned int column, std::ostream& stream) {
+    stream << CSI_CODE << row << ';' << column << 'H';
+}
+
+inline void move_cursor_up(unsigned int n, std::ostream& stream) { stream << CSI_CODE << n << 'A'; }
+inline void move_cursor_down(unsigned int n, std::ostream& stream) { stream << CSI_CODE << n << 'B'; }
+inline void move_cursor_right(unsigned int n, std::ostream& stream) { stream << CSI_CODE << n << 'C'; }
+inline void move_cursor_left(unsigned int n, std::ostream& stream) { stream << CSI_CODE << n << 'D'; }
 
 constexpr std::string_view STYLE_RESET               = CSI_CODE "0m";
 constexpr std::string_view STYLE_BOLD                = CSI_CODE "1m";

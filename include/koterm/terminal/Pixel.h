@@ -1,11 +1,11 @@
-#ifndef KOTERM_SCREEN_PIXEL
-#define KOTERM_SCREEN_PIXEL
+#ifndef KOTERM_TERMINAL_PIXEL
+#define KOTERM_TERMINAL_PIXEL
 
-#include "koterm/screen/Color.h"
+#include "koterm/terminal/Color.h"
 #include "koterm/util/bits.h"
 #include <cstdint>
 #include <string>
-namespace koterm::screen {
+namespace koterm::terminal {
 
 class PixelStyle {
 public:

@@ -1,12 +1,13 @@
-#include "koterm/screen/Buffer.h"
-#include "koterm/screen/ansi.h"
-#include "koterm/screen/colors.h"
+#include "koterm/terminal/Buffer.h"
+#include "koterm/terminal/ansi.h"
+#include "koterm/terminal/colors.h"
+#include "koterm/terminal/terminal.h"
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <iostream>
 
-namespace koterm::screen {
+namespace koterm::terminal {
 
 template <bool IS_BACKGROUND> inline void write_color(const Color& color) {
     switch (color.type()) {
@@ -23,7 +24,8 @@ template <bool IS_BACKGROUND> inline void write_color(const Color& color) {
 Buffer::Buffer(unit_t width, unit_t height)
     : m_width(width)
     , m_height(height)
-    , m_box(width - 1, height - 1) {
+    , m_box(width - 1, height - 1)
+    , m_render_box(m_box) {
     assert(width != 0 && height != 0);
 
     const std::size_t size = static_cast<std::size_t>(width) * height;
@@ -58,6 +60,15 @@ void Buffer::resize(unit_t width, unit_t height) {
     m_box    = { width - 1, height - 1 };
 }
 
+void Buffer::set_render_view(unit_t offset_x, unit_t offset_y, unit_t width, unit_t height) {
+    m_render_box.top    = offset_y;
+    m_render_box.bottom = offset_y + height;
+    m_render_box.left   = offset_x;
+    m_render_box.right  = offset_x + width;
+}
+
+void Buffer::set_render_view(BoundingBox box) { m_render_box = box; }
+
 void Buffer::clear_rect(BoundingBox rect) {
 
     const unit_t start_y = rect.top;
@@ -83,9 +94,17 @@ void Buffer::flush() const {
     PixelStyle prev_style;
     PixelColor prev_color = { colors::SYS_DEFAULT.id(), colors::SYS_DEFAULT.id() };
 
-    for (unit_t y = 0; y < m_height; y++) {
+    const auto& terminal = terminal::dimensions();
+
+    const unit_t start_x = m_render_box.left;
+    const unit_t end_x   = std::min(std::min(m_render_box.right, m_width), terminal.width);
+
+    const unit_t start_y = m_render_box.top;
+    const unit_t end_y   = std::min(std::min(m_render_box.bottom, m_height), terminal.height);
+
+    for (unit_t y = start_y; y < end_y; y++) {
         const std::size_t row_index = static_cast<std::size_t>(y) * m_width;
-        for (unit_t x = 0; x < m_width; x++) {
+        for (unit_t x = start_x; x < end_x; x++) {
 
             const std::size_t index = row_index + x;
             const auto pixel_style  = m_pixels_style.at(index);
