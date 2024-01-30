@@ -19,3 +19,12 @@ create_test(
   ${LIBRARY_NAME}
   NO_EXCEPTIONS
   WITH_MAIN)
+
+create_test(
+  "events"
+  FILES
+  koterm/event/events.cpp
+  LIBS
+  ${LIBRARY_NAME}
+  NO_EXCEPTIONS
+  WITH_MAIN)
