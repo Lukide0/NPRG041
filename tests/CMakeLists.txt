@@ -10,3 +10,12 @@ create_test(
   ${LIBRARY_NAME}
   NO_EXCEPTIONS
   WITH_MAIN)
+
+create_test(
+  "parser"
+  FILES
+  koterm/terminal/parser.cpp
+  LIBS
+  ${LIBRARY_NAME}
+  NO_EXCEPTIONS
+  WITH_MAIN)
