@@ -2,6 +2,7 @@
 #define KOTERM_UTIL_BITS_H
 
 #include "koterm/util/type.h"
+#include <array>
 #include <concepts>
 
 namespace koterm::util {

@@ -2,9 +2,9 @@
 #define KOTERM_TERMINAL_BUFFER_H
 
 #include "Pixel.h"
-#include "koterm/terminal/BoundingBox.h"
+#include "koterm/BoundingBox.h"
 #include "koterm/terminal/Tile.h"
-#include "unit.h"
+#include "koterm/unit.h"
 #include <vector>
 
 namespace koterm::terminal {

@@ -3,7 +3,7 @@
 
 #include "koterm/event/KeyCodes.h"
 #include "koterm/terminal/Parser.h"
-#include "koterm/terminal/unit.h"
+#include "koterm/unit.h"
 #include <string>
 
 namespace koterm::event {
@@ -20,19 +20,18 @@ struct MouseEvent {
         MIDDLE,
     };
 
-    template <Btn BTN> [[nodiscard]] bool btn() const {
+    template <Btn BTN> [[nodiscard]] bool btn_pressed() const {
         switch (BTN) {
         case Btn::LEFT:
-            return btn1() && !data.is_scroll();
+            return btn1() && data.is_button();
         case Btn::RIGHT:
-            return btn3() && !data.is_scroll();
+            return btn3() && data.is_button();
         case Btn::MIDDLE:
-            return btn2() && !data.is_scroll();
+            return btn2() && data.is_button();
         }
     }
 
-    template <Btn BTN> [[nodiscard]] bool btn_pressed() const { return btn<BTN>() && data.btn_down(); }
-    template <Btn BTN> [[nodiscard]] bool btn_released() const { return btn<BTN>() && data.btn_up(); }
+    [[nodiscard]] bool btn_released() const { return data.btn_release(); }
 
     [[nodiscard]] bool scroll_down() const { return data.is_scroll() && data.scroll_forward(); }
     [[nodiscard]] bool scroll_up() const { return data.is_scroll() && data.scroll_back(); }
@@ -41,14 +40,14 @@ struct MouseEvent {
     [[nodiscard]] bool shift() const { return data.shift(); }
     [[nodiscard]] bool meta() const { return data.meta(); }
 
-    [[nodiscard]] terminal::point_t pos() const { return data.mouse; }
+    [[nodiscard]] point_t pos() const { return data.mouse; }
 
 private:
     terminal::Parser::MouseEvent data;
 
-    [[nodiscard]] bool btn1() const { return data.btn1(); }
-    [[nodiscard]] bool btn2() const { return data.btn2(); }
-    [[nodiscard]] bool btn3() const { return data.btn3(); }
+    [[nodiscard]] bool btn1() const { return data.btn1_press(); }
+    [[nodiscard]] bool btn2() const { return data.btn2_press(); }
+    [[nodiscard]] bool btn3() const { return data.btn3_press(); }
 };
 
 class Event {
@@ -57,8 +56,9 @@ public:
         RESIZE,
         MOUSE_BTN,
         MOUSE_SCROLL,
-        KEY,
+        CHARACTER,
         SPECIAL_KEY,
+        CURSOR,
     };
 
     [[nodiscard]] EventType type() const { return m_type; }
@@ -66,7 +66,12 @@ public:
 private:
     EventType m_type;
 
-    union { };
+    union {
+        MouseEvent m_mouse;
+        KeyCode m_special_key;
+        CharacterEvent m_character;
+        point_t m_cursor;
+    };
 };
 
 }

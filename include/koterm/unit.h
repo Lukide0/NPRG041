@@ -1,10 +1,10 @@
-#ifndef KOTERM_TERMINAL_UNIT_H
-#define KOTERM_TERMINAL_UNIT_H
+#ifndef KOTERM_UNIT_H
+#define KOTERM_UNIT_H
 
 #include <cstdint>
 #include <limits>
 
-namespace koterm::terminal {
+namespace koterm {
 
 using unit_t = std::uint32_t;
 

@@ -1,7 +1,12 @@
 #include "koterm/terminal/Buffer.h"
+#include "koterm/BoundingBox.h"
+#include "koterm/terminal/Color.h"
+#include "koterm/terminal/Pixel.h"
+#include "koterm/terminal/Tile.h"
 #include "koterm/terminal/ansi.h"
 #include "koterm/terminal/colors.h"
 #include "koterm/terminal/terminal.h"
+#include "koterm/unit.h"
 #include <algorithm>
 #include <cassert>
 #include <cstddef>

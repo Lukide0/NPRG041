@@ -2,11 +2,12 @@
 #include <array>
 #include <doctest.h>
 #include <koterm/terminal/Parser.h>
-#include <koterm/terminal/unit.h>
+#include <koterm/unit.h>
 #include <span>
 #include <string>
 #include <string_view>
 
+using namespace koterm;
 using namespace koterm::terminal;
 using namespace std::string_view_literals;
 

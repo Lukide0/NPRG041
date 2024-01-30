@@ -1,8 +1,9 @@
 #ifndef KOTERM_TERMINAL_TERMINAL_H
 #define KOTERM_TERMINAL_TERMINAL_H
 
-#include "koterm/terminal/unit.h"
+#include "koterm/unit.h"
 #include "koterm/util/bits.h"
+#include <string_view>
 
 namespace koterm::terminal {
 
@@ -13,11 +14,11 @@ enum class ColorSupport {
 };
 
 enum class FeatureFlags : std::uint8_t {
-    NONE               = 0,
-    MOUSE_SUPPORT      = 1 << 0,
-    ALTERNATIVE_SCREEN = 1 << 1,
-    SUPPORT_TRUE_COLOR = 1 << 2,
-    EVENT_DRIVEN_MODE  = 1 << 3,
+    NONE                = 0,
+    MOUSE_SUPPORT       = 1 << 0,
+    ALTERNATIVE_SCREEN  = 1 << 1,
+    SUPPORT_TRUE_COLOR  = 1 << 2,
+    NO_ECHO_AND_WAITING = 1 << 3,
 
 };
 

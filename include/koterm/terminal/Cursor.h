@@ -2,7 +2,7 @@
 #define KOTERM_TERMINAL_CURSOR_H
 
 #include "koterm/terminal/ansi.h"
-#include "koterm/terminal/unit.h"
+#include "koterm/unit.h"
 #include <iostream>
 namespace koterm::terminal {
 

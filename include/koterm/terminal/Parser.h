@@ -2,11 +2,12 @@
 #define KOTERM_TERMINAL_PARSER_H
 
 #include "koterm/event/KeyCodes.h"
-#include "koterm/terminal/unit.h"
+#include "koterm/unit.h"
 #include "koterm/util/bits.h"
 #include "koterm/util/utf8.h"
 #include <cstdint>
 #include <span>
+#include <string_view>
 #include <vector>
 
 namespace koterm::terminal {
@@ -29,22 +30,24 @@ public:
         static constexpr std::uint8_t SHIFT_BIT   = 2;
         static constexpr std::uint8_t META_BIT    = 3;
         static constexpr std::uint8_t CONTROL_BIT = 4;
-        static constexpr std::uint8_t MOTION_BIT  = 5;
+        static constexpr std::uint8_t BUTTON_BIT  = 5;
         static constexpr std::uint8_t WHEEL_BIT   = 6;
 
-        [[nodiscard]] bool btn1() const { return !bits::is_set<MB1_BIT>(code); }
-        [[nodiscard]] bool btn2() const { return bits::is_set<MB2_BIT>(code); }
-        [[nodiscard]] bool btn3() const { return bits::is_set<MB3_BIT>(code); }
-        [[nodiscard]] bool btn_up() const { return bits::is_set<0, 1>(code); }
-        [[nodiscard]] bool btn_down() const { return !btn_up(); }
-        [[nodiscard]] bool scroll_back() const { return btn1(); }
-        [[nodiscard]] bool scroll_forward() const { return btn2(); }
+        [[nodiscard]] bool btn1_press() const { return !bits::is_set<MB1_BIT>(code); }
+        [[nodiscard]] bool btn2_press() const { return bits::is_set<MB2_BIT>(code); }
+        [[nodiscard]] bool btn3_press() const { return bits::is_set<MB3_BIT>(code); }
+        [[nodiscard]] bool btn_release() const { return bits::is_set<0, 1>(code); }
+        [[nodiscard]] bool btn_press() const { return !btn_release(); }
+        [[nodiscard]] bool scroll_back() const { return btn1_press(); }
+        [[nodiscard]] bool scroll_forward() const { return btn2_press(); }
         [[nodiscard]] bool shift() const { return bits::is_set<SHIFT_BIT>(code); }
         [[nodiscard]] bool meta() const { return bits::is_set<META_BIT>(code); }
         [[nodiscard]] bool control() const { return bits::is_set<CONTROL_BIT>(code); }
 
-        [[nodiscard]] bool is_scroll() const { return bits::is_set<WHEEL_BIT>(code); }
-        [[nodiscard]] bool is_motion() const { return bits::is_set<MOTION_BIT>(code); }
+        [[nodiscard]] bool is_scroll() const { return bits::is_set<WHEEL_BIT, BUTTON_BIT>(code); }
+        [[nodiscard]] bool is_button() const {
+            return bits::is_set<BUTTON_BIT>(code) && !bits::is_set<WHEEL_BIT>(code);
+        }
 
         std::uint8_t code;
         point_t mouse;

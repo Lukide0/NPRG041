@@ -4,10 +4,12 @@
 #include "koterm/util/os.h"
 #include "koterm/util/safe_getenv.h"
 #include <csignal>
+#include <cstdlib>
 #include <functional>
 #include <iostream>
 #include <memory>
 #include <stack>
+#include <string>
 #include <string_view>
 
 #ifdef OS_LINUX
