@@ -10,6 +10,7 @@ ExternalProject_Add(
   GIT_REPOSITORY https://github.com/doctest/doctest.git
   UPDATE_COMMAND ${GIT_EXECUTABLE} pull
   CONFIGURE_COMMAND ""
+  TIMEOUT 5
   BUILD_COMMAND ""
   INSTALL_COMMAND ""
   LOG_DOWNLOAD ON)
