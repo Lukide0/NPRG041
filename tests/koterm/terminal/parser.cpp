@@ -59,6 +59,7 @@ enum class Btn {
 template <bool IS_SCROLL = false>
 constexpr char create_cb(Btn btn, bool is_pressed, bool shift = false, bool meta = false, bool control = false) {
     auto code = static_cast<std::uint8_t>(btn);
+    code |= 32;
     if (!is_pressed) {
         code = 3;
     }
@@ -145,21 +146,21 @@ TEST_CASE("Parser: buttons") {
 
                 const auto& event = p.mouse();
                 CHECK_EQ(event.is_scroll(), false);
-                CHECK_EQ(event.is_motion(), false);
+                CHECK_EQ(event.is_button(), true);
 
                 CHECK_EQ(event.mouse, point_t { value_x, value_y });
 
-                CHECK_EQ(event.btn_down(), true);
+                CHECK_EQ(event.btn_press(), true);
 
                 switch (btn) {
                 case Btn::MB1:
-                    CHECK_EQ(event.btn1(), true);
+                    CHECK_EQ(event.btn1_press(), true);
                     break;
                 case Btn::MB2:
-                    CHECK_EQ(event.btn2(), true);
+                    CHECK_EQ(event.btn2_press(), true);
                     break;
                 case Btn::MB3:
-                    CHECK_EQ(event.btn3(), true);
+                    CHECK_EQ(event.btn3_press(), true);
                     break;
                 }
             }
@@ -187,7 +188,7 @@ TEST_CASE("Parser: wheel") {
 
                 const auto& event = p.mouse();
                 CHECK_EQ(event.is_scroll(), true);
-                CHECK_EQ(event.is_motion(), false);
+                CHECK_EQ(event.is_button(), false);
 
                 CHECK_EQ(event.mouse, point_t { value_x, value_y });
 

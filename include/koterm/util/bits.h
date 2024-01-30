@@ -46,11 +46,21 @@ public:
 
     constexpr bit_flags() = default;
 
+    template <std::size_t N> constexpr bit_flags(const std::array<Flags, N>& flags) { set(flags); }
+
     constexpr bit_flags(Flags default_flags)
         : m_data(static_cast<storage_t>(default_flags)) { }
 
     template <Flags... FLAGS> constexpr bit_flags<Flags>& set() {
         m_data |= ((static_cast<storage_t>(FLAGS)) | ...);
+        return *this;
+    }
+
+    template <std::size_t N> constexpr bit_flags<Flags>& set(const std::array<Flags, N>& flags) {
+        for (auto&& flag : flags) {
+            m_data |= static_cast<storage_t>(flag);
+        }
+
         return *this;
     }
 

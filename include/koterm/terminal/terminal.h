@@ -79,6 +79,7 @@ bool is_tty();
 bool input_available();
 
 void handle_signal(int sig);
+std::string_view error_msg();
 
 }
 

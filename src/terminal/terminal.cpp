@@ -27,6 +27,7 @@ struct TermInfo {
     ColorSupport color_support;
     Dimensions dimensions;
     Features features;
+    std::string error;
 
     std::stack<std::function<void()>> on_exit;
 
@@ -99,6 +100,7 @@ bool init(Features features = FeatureFlags::NONE) {
     if (features.contains<FeatureFlags::SUPPORT_TRUE_COLOR>()
         && g_terminfo->color_support != ColorSupport::TRUE_COLOR) {
         g_terminfo->exit();
+        g_terminfo->error = "the terminal does not support true color";
         return false;
     }
 
@@ -129,12 +131,16 @@ bool init(Features features = FeatureFlags::NONE) {
 
 #ifdef OS_LINUX
 
-    if (features.contains<FeatureFlags::EVENT_DRIVEN_MODE>()) {
+    add_signal_handler(SIGWINCH);
+    add_signal_handler(SIGQUIT);
+
+    if (features.contains<FeatureFlags::NO_ECHO_AND_WAITING>()) {
 
         // https://man7.org/linux/man-pages/man3/termios.3.html
         struct termios term;
         if (tcgetattr(STDIN_FILENO, &term) != 0) {
             g_terminfo->exit();
+            g_terminfo->error = "failed to retrieve terminal information";
             return false;
         }
 
@@ -150,6 +156,7 @@ bool init(Features features = FeatureFlags::NONE) {
 
         if (tcsetattr(STDIN_FILENO, TCSANOW, &term) != 0) {
             g_terminfo->exit();
+            g_terminfo->error = "failed to set terminal attributes";
             return false;
         }
     }
@@ -164,6 +171,7 @@ bool init(Features features = FeatureFlags::NONE) {
 ColorSupport color_support() { return g_terminfo->color_support; }
 Dimensions dimensions() { return g_terminfo->dimensions; }
 Features features() { return g_terminfo->features; }
+std::string_view error_msg() { return g_terminfo->error; }
 
 #ifdef OS_LINUX
 bool input_available() {
@@ -204,6 +212,7 @@ void handle_signal(int sig) {
     case SIGILL:
     case SIGABRT:
     case SIGFPE:
+    case SIGQUIT:
         g_terminfo.reset();
         std::quick_exit(1);
         break;
