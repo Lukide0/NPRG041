@@ -1,5 +1,6 @@
 #include "koterm/terminal/Buffer.h"
 #include "koterm/BoundingBox.h"
+#include "koterm/exceptions.h"
 #include "koterm/terminal/Color.h"
 #include "koterm/terminal/Pixel.h"
 #include "koterm/terminal/Tile.h"
@@ -7,6 +8,7 @@
 #include "koterm/terminal/colors.h"
 #include "koterm/terminal/terminal.h"
 #include "koterm/unit.h"
+#include "koterm/util/debug.h"
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
@@ -139,35 +141,55 @@ void Buffer::flush() const {
 }
 
 void Buffer::set_pixel_style(PixelStyle style, unit_t x, unit_t y) {
-    assert(m_box.contains(x, y));
+    koterm_assert(
+        m_box.contains(x, y),
+        exception::InvalidPositionException { "Position out of bounding box" },
+        "Position out of bounding box"
+    );
 
     std::size_t index     = to_index(x, y);
     m_pixels_style[index] = style;
 }
 
 void Buffer::set_pixel_background(Color::color_id background, unit_t x, unit_t y) {
-    assert(m_box.contains(x, y));
+    koterm_assert(
+        m_box.contains(x, y),
+        exception::InvalidPositionException { "Position out of bounding box" },
+        "Position out of bounding box"
+    );
 
     std::size_t index        = to_index(x, y);
     m_pixels_color[index].bg = background;
 }
 
 void Buffer::set_pixel_foreground(Color::color_id foreground, unit_t x, unit_t y) {
-    assert(m_box.contains(x, y));
+    koterm_assert(
+        m_box.contains(x, y),
+        exception::InvalidPositionException { "Position out of bounding box" },
+        "Position out of bounding box"
+    );
 
     std::size_t index        = to_index(x, y);
     m_pixels_color[index].fg = foreground;
 }
 
 void Buffer::set_pixel_color(Color::color_id background, Color::color_id foreground, unit_t x, unit_t y) {
-    assert(m_box.contains(x, y));
+    koterm_assert(
+        m_box.contains(x, y),
+        exception::InvalidPositionException { "Position out of bounding box" },
+        "Position out of bounding box"
+    );
 
     std::size_t index     = to_index(x, y);
     m_pixels_color[index] = { .bg = background, .fg = foreground };
 }
 
-void Buffer::set_pixel_content(PixelContent content, unit_t x, unit_t y) {
-    assert(m_box.contains(x, y));
+void Buffer::set_pixel_content(const PixelContent& content, unit_t x, unit_t y) {
+    koterm_assert(
+        m_box.contains(x, y),
+        exception::InvalidPositionException { "Position out of bounding box" },
+        "Position out of bounding box"
+    );
 
     std::size_t index       = to_index(x, y);
     m_pixels_content[index] = content;
@@ -175,20 +197,28 @@ void Buffer::set_pixel_content(PixelContent content, unit_t x, unit_t y) {
 }
 
 void Buffer::set_pixel_content(TileEncoding tile, unit_t x, unit_t y) {
-    assert(m_box.contains(x, y));
+    koterm_assert(
+        m_box.contains(x, y),
+        exception::InvalidPositionException { "Position out of bounding box" },
+        "Position out of bounding box"
+    );
 
-    std::size_t index       = to_index(x, y);
-    m_tiles[index]          = tile;
-    m_pixels_content[index] = TILES_MAP.at(tile);
+    std::size_t index               = to_index(x, y);
+    m_tiles[index]                  = tile;
+    m_pixels_content[index].content = TILES_MAP.at(tile);
 }
 
 void Buffer::combine_tile(TileEncoding tile, unit_t x, unit_t y) {
-    assert(m_box.contains(x, y));
+    koterm_assert(
+        m_box.contains(x, y),
+        exception::InvalidPositionException { "Position out of bounding box" },
+        "Position out of bounding box"
+    );
 
-    std::size_t index       = to_index(x, y);
-    auto& buffer_tile       = m_tiles[index];
-    buffer_tile             = buffer_tile.combine(tile);
-    m_pixels_content[index] = TILES_MAP.at(buffer_tile);
+    std::size_t index               = to_index(x, y);
+    auto& buffer_tile               = m_tiles[index];
+    buffer_tile                     = buffer_tile.combine(tile);
+    m_pixels_content[index].content = TILES_MAP.at(buffer_tile);
 }
 
 }
