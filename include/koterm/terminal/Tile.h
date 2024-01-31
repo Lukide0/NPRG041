@@ -2,10 +2,14 @@
 #define KOTERM_TERMINAL_TILE_H
 
 #include "koterm/util/ConstMap.h"
+#include <algorithm>
+#include <array>
 #include <cassert>
 #include <compare>
 #include <cstdint>
+#include <limits>
 #include <string_view>
+#include <utility>
 
 namespace koterm::terminal {
 

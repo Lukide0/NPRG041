@@ -5,6 +5,7 @@
 #include "koterm/util/bits.h"
 #include <cstdint>
 #include <string>
+#include <string_view>
 namespace koterm::terminal {
 
 class PixelStyle {
@@ -37,10 +38,10 @@ private:
 };
 
 struct PixelContent {
-    constexpr PixelContent()
+    PixelContent()
         : content(" ") { }
-    constexpr PixelContent(char ch) { content += ch; }
-    constexpr PixelContent(std::string_view value)
+    PixelContent(char ch) { content += ch; }
+    PixelContent(std::string_view value)
         : content(value) { }
 
     std::string content;
