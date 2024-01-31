@@ -96,9 +96,6 @@ void Buffer::clear_rect(BoundingBox rect) {
 
 void Buffer::flush() const {
 
-    PixelStyle prev_style;
-    PixelColor prev_color = { colors::SYS_DEFAULT.id(), colors::SYS_DEFAULT.id() };
-
     const auto& terminal = terminal::dimensions();
 
     const unit_t start_x = m_render_box.left;
@@ -107,9 +104,11 @@ void Buffer::flush() const {
     const unit_t start_y = m_render_box.top;
     const unit_t end_y   = std::min(std::min(m_render_box.bottom, m_height), terminal.height);
 
-    for (unit_t y = start_y; y < end_y; y++) {
+    for (unit_t y = start_y; y <= end_y; y++) {
+        PixelStyle prev_style;
+        PixelColor prev_color       = { colors::SYS_DEFAULT.id(), colors::SYS_DEFAULT.id() };
         const std::size_t row_index = static_cast<std::size_t>(y) * m_width;
-        for (unit_t x = start_x; x < end_x; x++) {
+        for (unit_t x = start_x; x <= end_x; x++) {
 
             const std::size_t index = row_index + x;
             const auto pixel_style  = m_pixels_style.at(index);
@@ -131,7 +130,9 @@ void Buffer::flush() const {
             prev_color = pixel_color;
         }
 
-        std::cout << ansi::STYLE_RESET << "\r\n";
+        if (y != end_y) {
+            std::cout << ansi::STYLE_RESET << "\r\n";
+        }
     }
 
     std::cout.flush();
