@@ -3,8 +3,14 @@
 
 #include "Pixel.h"
 #include "koterm/BoundingBox.h"
+#include "koterm/exceptions.h"
+#include "koterm/terminal/Color.h"
 #include "koterm/terminal/Tile.h"
 #include "koterm/unit.h"
+#include "koterm/util/debug.h"
+#include <cassert>
+#include <cstddef>
+#include <type_traits>
 #include <vector>
 
 namespace koterm::terminal {
@@ -117,7 +123,7 @@ public:
      * @param x The x-coordinate of the pixel.
      * @param y The y-coordinate of the pixel.
      */
-    void set_pixel_content(PixelContent content, unit_t x, unit_t y);
+    void set_pixel_content(const PixelContent& content, unit_t x, unit_t y);
 
     /**
      * @brief Sets the content of a pixel in the buffer using a tile encoding.
@@ -191,6 +197,189 @@ private:
 
     [[nodiscard]] std::size_t to_index(unit_t x, unit_t y) const { return x + y * m_width; }
 };
+
+template <bool IS_CONST> class BufferSpanBase {
+public:
+    using buffer_t = std::conditional_t<IS_CONST, const Buffer, Buffer>;
+
+    BufferSpanBase(buffer_t& buffer, const BoundingBox& box)
+        : m_buffer(buffer)
+        , m_box(box) { }
+
+    /**
+     * @brief Clears the entire buffer.
+     */
+    void clear() { m_buffer.clear_rect(m_box); }
+
+    /**
+     * @brief Clears a rectangular region of the buffer.
+     *
+     * @param rect The bounding box specifying the region to clear.
+     */
+    void clear_rect(BoundingBox rect) { m_buffer.clear_rect(BoundingBox::overlap(m_box, rect)); }
+
+    /**
+     * @brief Sets the style of a pixel in the buffer.
+     *
+     * @param style The style to set.
+     * @param x The x-coordinate of the pixel.
+     * @param y The y-coordinate of the pixel.
+     */
+    void set_pixel_style(PixelStyle style, unit_t x, unit_t y) {
+        koterm_assert(
+            m_box.contains(x, y),
+            exception::InvalidPositionException { "Position out of bounding box" },
+            "Position out of bounding box"
+        );
+        m_buffer.set_pixel_style(style, x, y);
+    }
+
+    /**
+     * @brief Sets the background color of a pixel in the buffer.
+     *
+     * @param background The background color to set.
+     * @param x The x-coordinate of the pixel.
+     * @param y The y-coordinate of the pixel.
+     */
+    void set_pixel_background(Color::color_id background, unit_t x, unit_t y) {
+        koterm_assert(
+            m_box.contains(x, y),
+            exception::InvalidPositionException { "Position out of bounding box" },
+            "Position out of bounding box"
+        );
+        m_buffer.set_pixel_background(background, x, y);
+    }
+
+    /**
+     * @brief Sets the foreground color of a pixel in the buffer.
+     *
+     * @param foreground The foreground color to set.
+     * @param x The x-coordinate of the pixel.
+     * @param y The y-coordinate of the pixel.
+     */
+    void set_pixel_foreground(Color::color_id foreground, unit_t x, unit_t y) {
+        koterm_assert(
+            m_box.contains(x, y),
+            exception::InvalidPositionException { "Position out of bounding box" },
+            "Position out of bounding box"
+        );
+        m_buffer.set_pixel_foreground(foreground, x, y);
+    }
+
+    /**
+     * @brief Sets both background and foreground colors of a pixel in the buffer.
+     *
+     * @param background The background color to set.
+     * @param foreground The foreground color to set.
+     * @param x The x-coordinate of the pixel.
+     * @param y The y-coordinate of the pixel.
+     */
+    void set_pixel_color(Color::color_id background, Color::color_id foreground, unit_t x, unit_t y) {
+        koterm_assert(
+            m_box.contains(x, y),
+            exception::InvalidPositionException { "Position out of bounding box" },
+            "Position out of bounding box"
+        );
+        m_buffer.set_pixel_color(background, foreground, x, y);
+    }
+
+    /**
+     * @brief Sets the color of a pixel in the buffer.
+     *
+     * @param color The color to set.
+     * @param x The x-coordinate of the pixel.
+     * @param y The y-coordinate of the pixel.
+     */
+    void set_pixel_color(PixelColor color, unit_t x, unit_t y) { set_pixel_color(color.bg, color.fg, x, y); }
+
+    /**
+     * @brief Sets the content of a pixel in the buffer.
+     *
+     * @param content The content to set.
+     * @param x The x-coordinate of the pixel.
+     * @param y The y-coordinate of the pixel.
+     */
+    void set_pixel_content(const PixelContent& content, unit_t x, unit_t y) {
+        koterm_assert(
+            m_box.contains(x, y),
+            exception::InvalidPositionException { "Position out of bounding box" },
+            "Position out of bounding box"
+        );
+        m_buffer.set_pixel_color(content, x, y);
+    }
+
+    /**
+     * @brief Sets the content of a pixel in the buffer using a tile encoding.
+     *
+     * @param tile The tile encoding to set.
+     * @param x The x-coordinate of the pixel.
+     * @param y The y-coordinate of the pixel.
+     */
+    void set_pixel_content(TileEncoding tile, unit_t x, unit_t y) {
+        koterm_assert(
+            m_box.contains(x, y),
+            exception::InvalidPositionException { "Position out of bounding box" },
+            "Position out of bounding box"
+        );
+        m_buffer.set_pixel_content(tile, x, y);
+    }
+
+    /**
+     * @brief Combines a tile with the content of a pixel in the buffer.
+     *
+     * @param tile The tile encoding to combine.
+     * @param x The x-coordinate of the pixel.
+     * @param y The y-coordinate of the pixel.
+     */
+    void combine_tile(TileEncoding tile, unit_t x, unit_t y) {
+        koterm_assert(
+            m_box.contains(x, y),
+            exception::InvalidPositionException { "Position out of bounding box" },
+            "Position out of bounding box"
+        );
+        m_buffer.combine_tile(tile, x, y);
+    }
+
+    /**
+     * @brief Gets the style of a pixel in the buffer.
+     *
+     * @param x The x-coordinate of the pixel.
+     * @param y The y-coordinate of the pixel.
+     * @return The style of the pixel.
+     */
+    [[nodiscard]] PixelStyle get_pixel_style(unit_t x, unit_t y) const { return m_buffer.get_pixel_style(x, y); }
+
+    /**
+     * @brief Gets the content of a pixel in the buffer.
+     *
+     * @param x The x-coordinate of the pixel.
+     * @param y The y-coordinate of the pixel.
+     * @return The content of the pixel.
+     */
+    [[nodiscard]] PixelContent get_pixel_content(unit_t x, unit_t y) const { return m_buffer.get_pixel_content(x, y); }
+
+    /**
+     * @brief Gets the color of a pixel in the buffer.
+     *
+     * @param x The x-coordinate of the pixel.
+     * @param y The y-coordinate of the pixel.
+     * @return The color of the pixel.
+     */
+    [[nodiscard]] PixelColor get_pixel_color(unit_t x, unit_t y) const { return m_buffer.get_pixel_color(x, y); }
+
+    void resize(const BoundingBox& box) { m_box = box; }
+
+    const buffer_t buffer() const { return m_buffer; }
+    buffer_t buffer() { return m_buffer; }
+    const BoundingBox& box() { return m_box; }
+
+private:
+    buffer_t& m_buffer;
+    BoundingBox m_box;
+};
+
+using ConstBufferView = BufferSpanBase<true>;
+using BufferSpan      = BufferSpanBase<false>;
 
 }
 
