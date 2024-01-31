@@ -25,6 +25,15 @@ struct BoundingBox {
         , left(0)
         , right(width) { }
 
+    constexpr BoundingBox(const Dimensions& dims)
+        : top(0)
+        , bottom(dims.height)
+        , left(0)
+        , right(dims.width) { }
+
+    constexpr BoundingBox(BoundingBox&&)      = default;
+    constexpr BoundingBox(const BoundingBox&) = default;
+
     unit_t top;
     unit_t bottom;
     unit_t left;
@@ -37,7 +46,7 @@ struct BoundingBox {
      * @param b The second BoundingBox.
      * @return True if there is an intersection, false otherwise.
      */
-    static constexpr bool intersection(BoundingBox a, BoundingBox b) {
+    static constexpr bool intersection(const BoundingBox& a, const BoundingBox& b) {
         // check for overlap along the x-axis
         if (a.right < b.left || b.right < a.left) {
             return false;
@@ -60,6 +69,25 @@ struct BoundingBox {
      */
     [[nodiscard]] constexpr bool contains(unit_t x, unit_t y) const {
         return util::range::inside(x, left, right) && util::range::inside(y, top, bottom);
+    }
+
+    [[nodiscard]] static constexpr BoundingBox overlap(const BoundingBox& a, const BoundingBox& b) {
+
+        if (!intersection(a, b)) {
+            return { 0, 0, 0, 0 };
+        }
+
+        const unit_t left   = std::max(a.left, b.left);
+        const unit_t right  = std::min(a.right, b.right);
+        const unit_t top    = std::max(a.top, b.top);
+        const unit_t bottom = std::min(a.bottom, b.bottom);
+
+        return { top, bottom, left, right };
+    }
+
+    constexpr BoundingBox& operator=(const BoundingBox& box) = default;
+    constexpr bool operator==(const BoundingBox& box) const {
+        return box.left == left && box.right == right && box.top == top && box.bottom == bottom;
     }
 };
 
