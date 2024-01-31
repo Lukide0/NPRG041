@@ -1,8 +1,10 @@
 #ifndef KOTERM_TERMINAL_TERMINAL_H
 #define KOTERM_TERMINAL_TERMINAL_H
 
+#include "koterm/Dimensions.h"
 #include "koterm/unit.h"
 #include "koterm/util/bits.h"
+#include <cstdint>
 #include <string_view>
 
 namespace koterm::terminal {
@@ -20,10 +22,6 @@ enum class FeatureFlags : std::uint8_t {
     SUPPORT_TRUE_COLOR  = 1 << 2,
     NO_ECHO_AND_WAITING = 1 << 3,
 
-};
-
-struct Dimensions {
-    unit_t width, height;
 };
 
 using Features = util::bit_flags<FeatureFlags>;

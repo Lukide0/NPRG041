@@ -1,8 +1,10 @@
 #ifndef KOTERM_BOUNDINGBOX_H
 #define KOTERM_BOUNDINGBOX_H
 
+#include "koterm/Dimensions.h"
 #include "koterm/unit.h"
 #include "koterm/util/range.h"
+#include <algorithm>
 namespace koterm {
 
 /**

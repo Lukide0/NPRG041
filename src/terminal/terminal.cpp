@@ -1,4 +1,5 @@
 #include "koterm/terminal/terminal.h"
+#include "koterm/Dimensions.h"
 #include "koterm/terminal/ansi.h"
 #include "koterm/util/discard.h"
 #include "koterm/util/os.h"
@@ -41,6 +42,7 @@ struct TermInfo {
 
     ~TermInfo() { exit(); }
 };
+void update_dimensions();
 
 static std::unique_ptr<TermInfo> g_terminfo = nullptr;
 
@@ -162,6 +164,7 @@ bool init(Features features = FeatureFlags::NONE) {
     }
 
 #endif
+    update_dimensions();
 
     std::cout.flush();
 

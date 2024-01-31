@@ -1,6 +1,7 @@
 #ifndef KOTERM_EVENT_EVENT_H
 #define KOTERM_EVENT_EVENT_H
 
+#include "koterm/Dimensions.h"
 #include "koterm/event/KeyCodes.h"
 #include "koterm/terminal/Parser.h"
 #include "koterm/unit.h"
