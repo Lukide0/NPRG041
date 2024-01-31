@@ -1,0 +1,40 @@
+#include "koterm/dom/DomManager.h"
+#include "koterm/Dimensions.h"
+#include "koterm/dom/Element.h"
+#include "koterm/event/Event.h"
+#include "koterm/unit.h"
+
+namespace koterm::dom {
+
+void DomManager::handle_event(const event::Event& event) {
+    if (m_root_element != nullptr) {
+        m_root_element->handle_event(event);
+    }
+}
+
+void DomManager::steal_focus(element_ref element) { m_focused = element; }
+void DomManager::lose_focus(element_ref element) {
+    if (m_focused == element) {
+        m_focused = nullptr;
+    }
+}
+
+void DomManager::update_size(unit_t width, unit_t height) {
+    if (m_root_element != nullptr) {
+        m_root_element->handle_resize({ width, height });
+    }
+}
+
+void DomManager::update_size(const Dimensions& dimensions) {
+    if (m_root_element != nullptr) {
+        m_root_element->handle_resize(dimensions);
+    }
+}
+
+void DomManager::render(double delta) {
+    if (m_root_element != nullptr) {
+        m_root_element->render(delta);
+    }
+}
+
+}
