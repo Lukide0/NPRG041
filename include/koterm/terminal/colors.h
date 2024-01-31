@@ -3,7 +3,7 @@
 
 #include "koterm/terminal/Color.h"
 
-#define DEFINE_SYS_COLOR(name, id) constexpr auto SYS_##name = Color::from_id(id)
+#define DEFINE_SYS_COLOR(name, id) constexpr auto SYS_##name = Color::from_code(id)
 
 namespace koterm::terminal::colors {
 
