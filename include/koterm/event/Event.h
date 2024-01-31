@@ -55,6 +55,7 @@ class Event {
 public:
     enum class EventType {
         RESIZE,
+        MOUSE_MOVE,
         MOUSE_BTN,
         MOUSE_SCROLL,
         CHARACTER,
@@ -64,6 +65,21 @@ public:
 
     [[nodiscard]] EventType type() const { return m_type; }
 
+    template <EventType TYPE> [[nodiscard]] const auto& get() const {
+
+        if constexpr (TYPE == EventType::RESIZE) {
+            return m_resize;
+        } else if constexpr (TYPE == EventType::MOUSE_BTN || TYPE == EventType::MOUSE_SCROLL || TYPE == EventType::MOUSE_MOVE) {
+            return m_mouse;
+        } else if constexpr (TYPE == EventType::CHARACTER) {
+            return m_character;
+        } else if constexpr (TYPE == EventType::SPECIAL_KEY) {
+            return m_special_key;
+        } else if constexpr (TYPE == EventType::CURSOR) {
+            return m_cursor;
+        }
+    }
+
 private:
     EventType m_type;
 
@@ -72,9 +88,9 @@ private:
         KeyCode m_special_key;
         CharacterEvent m_character;
         point_t m_cursor;
+        Dimensions m_resize;
     };
 };
-
 }
 
 #endif
