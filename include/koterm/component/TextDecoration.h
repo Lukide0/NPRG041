@@ -1,0 +1,81 @@
+#ifndef KOTERM_COMPONENT_TEXTDECORATION_H
+#define KOTERM_COMPONENT_TEXTDECORATION_H
+
+#include "koterm/terminal/Pixel.h"
+namespace koterm::component {
+
+class TextDecoration {
+public:
+    using Decoration = terminal::PixelStyle::StyleFlags;
+
+    TextDecoration& set(Decoration decoration) {
+        switch (decoration) {
+        case Decoration::BOLD:
+            m_style.set<Decoration::BOLD>();
+            break;
+        case Decoration::DIM:
+            m_style.set<Decoration::DIM>();
+            break;
+        case Decoration::ITALIC:
+            m_style.set<Decoration::ITALIC>();
+            break;
+        case Decoration::UNDERLINE:
+            m_style.set<Decoration::UNDERLINE>();
+            break;
+        case Decoration::BLINK:
+            m_style.set<Decoration::BLINK>();
+            break;
+        case Decoration::INVERSE:
+            m_style.set<Decoration::INVERSE>();
+            break;
+        case Decoration::HIDDEN:
+            m_style.set<Decoration::HIDDEN>();
+            break;
+        case Decoration::STRIKETHROUGH:
+            m_style.set<Decoration::STRIKETHROUGH>();
+            break;
+        }
+
+        return *this;
+    }
+
+    TextDecoration& unset(Decoration decoration) {
+        switch (decoration) {
+        case Decoration::BOLD:
+            m_style.unset<Decoration::BOLD>();
+            break;
+        case Decoration::DIM:
+            m_style.unset<Decoration::DIM>();
+            break;
+        case Decoration::ITALIC:
+            m_style.unset<Decoration::ITALIC>();
+            break;
+        case Decoration::UNDERLINE:
+            m_style.unset<Decoration::UNDERLINE>();
+            break;
+        case Decoration::BLINK:
+            m_style.unset<Decoration::BLINK>();
+            break;
+        case Decoration::INVERSE:
+            m_style.unset<Decoration::INVERSE>();
+            break;
+        case Decoration::HIDDEN:
+            m_style.unset<Decoration::HIDDEN>();
+            break;
+        case Decoration::STRIKETHROUGH:
+            m_style.unset<Decoration::STRIKETHROUGH>();
+            break;
+        }
+
+        return *this;
+    }
+
+    [[nodiscard]] terminal::PixelStyle style() const { return m_style; }
+
+private:
+    terminal::PixelStyle m_style;
+};
+
+}
+
+#endif
