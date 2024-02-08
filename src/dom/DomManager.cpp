@@ -21,20 +21,21 @@ void DomManager::lose_focus(element_ref element) {
 
 void DomManager::update_size(unit_t width, unit_t height) {
     if (m_root_element != nullptr) {
-        m_root_element->handle_resize({ width, height });
+        m_root_element->handle_change_box({ width - 1, height - 1 });
     }
 }
 
 void DomManager::update_size(const Dimensions& dimensions) {
     if (m_root_element != nullptr) {
-        m_root_element->handle_resize(dimensions);
+        m_root_element->handle_change_box({ dimensions.width - 1, dimensions.height - 1 });
     }
 }
 
-void DomManager::render(double delta) {
+void DomManager::render() {
     if (m_root_element != nullptr) {
-        m_root_element->render(delta);
+        m_root_element->render();
     }
+    m_need_redraw = false;
 }
 
 }

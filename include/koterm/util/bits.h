@@ -4,6 +4,8 @@
 #include "koterm/util/type.h"
 #include <array>
 #include <concepts>
+#include <cstddef>
+#include <type_traits>
 
 namespace koterm::util {
 
@@ -34,8 +36,9 @@ template <std::integral Storage> struct bits {
     }
 
     template <std::size_t... INDEXES> static consteval value_t create_mask() { return (bit<INDEXES>() | ...); }
+
     template <std::size_t... OTHER> static consteval value_t create_inverse_mask() {
-        return ~(create_mask<OTHER...>());
+        return static_cast<value_t>(~(create_mask<OTHER...>()));
     }
 };
 

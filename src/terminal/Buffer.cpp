@@ -101,15 +101,18 @@ void Buffer::flush() const {
     const auto& terminal = terminal::dimensions();
 
     const unit_t start_x = m_render_box.left;
-    const unit_t end_x   = std::min(std::min(m_render_box.right, m_width), terminal.width);
+    const unit_t end_x   = std::min(std::min(m_render_box.right, m_width - 1), terminal.width - 1);
 
     const unit_t start_y = m_render_box.top;
-    const unit_t end_y   = std::min(std::min(m_render_box.bottom, m_height), terminal.height);
+    const unit_t end_y   = std::min(std::min(m_render_box.bottom, m_height - 1), terminal.height - 1);
+
+    std::cout << ansi::STYLE_RESET;
 
     for (unit_t y = start_y; y <= end_y; y++) {
         PixelStyle prev_style;
         PixelColor prev_color       = { colors::SYS_DEFAULT.id(), colors::SYS_DEFAULT.id() };
         const std::size_t row_index = static_cast<std::size_t>(y) * m_width;
+
         for (unit_t x = start_x; x <= end_x; x++) {
 
             const std::size_t index = row_index + x;

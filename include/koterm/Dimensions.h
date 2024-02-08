@@ -8,6 +8,8 @@ namespace koterm {
 struct Dimensions {
     unit_t width;
     unit_t height;
+
+    constexpr bool operator==(const Dimensions& other) const { return other.width == width && other.height == height; }
 };
 
 }

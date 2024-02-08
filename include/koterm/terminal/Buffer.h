@@ -11,6 +11,7 @@
 #include <cassert>
 #include <cstddef>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 namespace koterm::terminal {
@@ -199,6 +200,9 @@ private:
 };
 
 template <bool IS_CONST> class BufferSpanBase {
+private:
+    static constexpr bool is_mutable = !IS_CONST;
+
 public:
     using buffer_t = std::conditional_t<IS_CONST, const Buffer, Buffer>;
 
@@ -206,17 +210,59 @@ public:
         : m_buffer(buffer)
         , m_box(box) { }
 
+    BufferSpanBase(const BufferSpanBase& span)
+        : m_buffer(span.m_buffer)
+        , m_box(span.m_box) { }
+
+    BufferSpanBase(BufferSpanBase&& span)
+        : m_buffer(std::move(span.m_buffer))
+        , m_box(std::move(span.m_box)) { }
+
+    BufferSpanBase& operator=(const BufferSpanBase& span) {
+        m_box    = span.m_box;
+        m_buffer = span.m_buffer;
+        return *this;
+    }
+
+    template <bool CONSTANT>
+    BufferSpanBase& operator=(BufferSpanBase<CONSTANT>&& span)
+        requires(!is_mutable || BufferSpanBase<CONSTANT>::is_mutable)
+    {
+        m_box    = std::move(span.m_box);
+        m_buffer = std::move(span.m_buffer);
+        return *this;
+    }
+
+    operator BufferSpanBase<true>() { return BufferSpanBase<true> { m_buffer, m_box }; }
+
     /**
      * @brief Clears the entire buffer.
      */
-    void clear() { m_buffer.clear_rect(m_box); }
+    void clear()
+        requires(is_mutable)
+    {
+        if (width() == 0 || height() == 0) {
+            return;
+        }
+
+        m_buffer.clear_rect(m_box);
+    }
 
     /**
      * @brief Clears a rectangular region of the buffer.
      *
      * @param rect The bounding box specifying the region to clear.
      */
-    void clear_rect(BoundingBox rect) { m_buffer.clear_rect(BoundingBox::overlap(m_box, rect)); }
+    void clear_rect(BoundingBox rect)
+        requires(is_mutable)
+    {
+        rect.left += m_box.left;
+        rect.right += m_box.left;
+        rect.top += m_box.top;
+        rect.top += m_box.top;
+
+        m_buffer.clear_rect(BoundingBox::overlap(m_box, rect));
+    }
 
     /**
      * @brief Sets the style of a pixel in the buffer.
@@ -225,7 +271,12 @@ public:
      * @param x The x-coordinate of the pixel.
      * @param y The y-coordinate of the pixel.
      */
-    void set_pixel_style(PixelStyle style, unit_t x, unit_t y) {
+    void set_pixel_style(PixelStyle style, unit_t x, unit_t y)
+        requires(is_mutable)
+    {
+        x += m_box.left;
+        y += m_box.top;
+
         koterm_assert(
             m_box.contains(x, y),
             exception::InvalidPositionException { "Position out of bounding box" },
@@ -241,7 +292,11 @@ public:
      * @param x The x-coordinate of the pixel.
      * @param y The y-coordinate of the pixel.
      */
-    void set_pixel_background(Color::color_id background, unit_t x, unit_t y) {
+    void set_pixel_background(Color::color_id background, unit_t x, unit_t y)
+        requires(is_mutable)
+    {
+        x += m_box.left;
+        y += m_box.top;
         koterm_assert(
             m_box.contains(x, y),
             exception::InvalidPositionException { "Position out of bounding box" },
@@ -257,7 +312,11 @@ public:
      * @param x The x-coordinate of the pixel.
      * @param y The y-coordinate of the pixel.
      */
-    void set_pixel_foreground(Color::color_id foreground, unit_t x, unit_t y) {
+    void set_pixel_foreground(Color::color_id foreground, unit_t x, unit_t y)
+        requires(is_mutable)
+    {
+        x += m_box.left;
+        y += m_box.top;
         koterm_assert(
             m_box.contains(x, y),
             exception::InvalidPositionException { "Position out of bounding box" },
@@ -274,7 +333,11 @@ public:
      * @param x The x-coordinate of the pixel.
      * @param y The y-coordinate of the pixel.
      */
-    void set_pixel_color(Color::color_id background, Color::color_id foreground, unit_t x, unit_t y) {
+    void set_pixel_color(Color::color_id background, Color::color_id foreground, unit_t x, unit_t y)
+        requires(is_mutable)
+    {
+        x += m_box.left;
+        y += m_box.top;
         koterm_assert(
             m_box.contains(x, y),
             exception::InvalidPositionException { "Position out of bounding box" },
@@ -290,7 +353,11 @@ public:
      * @param x The x-coordinate of the pixel.
      * @param y The y-coordinate of the pixel.
      */
-    void set_pixel_color(PixelColor color, unit_t x, unit_t y) { set_pixel_color(color.bg, color.fg, x, y); }
+    void set_pixel_color(PixelColor color, unit_t x, unit_t y)
+        requires(is_mutable)
+    {
+        set_pixel_color(color.bg, color.fg, x, y);
+    }
 
     /**
      * @brief Sets the content of a pixel in the buffer.
@@ -299,13 +366,17 @@ public:
      * @param x The x-coordinate of the pixel.
      * @param y The y-coordinate of the pixel.
      */
-    void set_pixel_content(const PixelContent& content, unit_t x, unit_t y) {
+    void set_pixel_content(const PixelContent& content, unit_t x, unit_t y)
+        requires(is_mutable)
+    {
+        x += m_box.left;
+        y += m_box.top;
         koterm_assert(
             m_box.contains(x, y),
             exception::InvalidPositionException { "Position out of bounding box" },
             "Position out of bounding box"
         );
-        m_buffer.set_pixel_color(content, x, y);
+        m_buffer.set_pixel_content(content, x, y);
     }
 
     /**
@@ -315,7 +386,11 @@ public:
      * @param x The x-coordinate of the pixel.
      * @param y The y-coordinate of the pixel.
      */
-    void set_pixel_content(TileEncoding tile, unit_t x, unit_t y) {
+    void set_pixel_content(TileEncoding tile, unit_t x, unit_t y)
+        requires(is_mutable)
+    {
+        x += m_box.left;
+        y += m_box.top;
         koterm_assert(
             m_box.contains(x, y),
             exception::InvalidPositionException { "Position out of bounding box" },
@@ -331,7 +406,11 @@ public:
      * @param x The x-coordinate of the pixel.
      * @param y The y-coordinate of the pixel.
      */
-    void combine_tile(TileEncoding tile, unit_t x, unit_t y) {
+    void combine_tile(TileEncoding tile, unit_t x, unit_t y)
+        requires(is_mutable)
+    {
+        x += m_box.left;
+        y += m_box.top;
         koterm_assert(
             m_box.contains(x, y),
             exception::InvalidPositionException { "Position out of bounding box" },
@@ -369,9 +448,16 @@ public:
 
     void resize(const BoundingBox& box) { m_box = box; }
 
-    const buffer_t buffer() const { return m_buffer; }
-    buffer_t buffer() { return m_buffer; }
-    const BoundingBox& box() { return m_box; }
+    [[nodiscard]] const buffer_t& buffer() const { return m_buffer; }
+    buffer_t& buffer()
+        requires(is_mutable)
+    {
+        return m_buffer;
+    }
+    [[nodiscard]] const BoundingBox& box() const { return m_box; }
+
+    [[nodiscard]] unit_t width() const { return m_box.right - m_box.left; }
+    [[nodiscard]] unit_t height() const { return m_box.bottom - m_box.top; }
 
 private:
     buffer_t& m_buffer;

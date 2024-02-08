@@ -23,12 +23,17 @@ public:
 
     void update_size(unit_t width, unit_t height);
     void update_size(const Dimensions& dimensions);
-    void render(double delta);
+    void render();
+
+    [[nodiscard]] bool need_render() const { return m_need_redraw; }
+    void request_render() { m_need_redraw = true; }
 
 private:
     element_t m_root_element;
     element_ref m_focused;
     element_ref m_active;
+
+    bool m_need_redraw = false;
 };
 
 }
