@@ -227,6 +227,16 @@ void print_event_key(event::KeyCode key) {
                   << "PAGE_DOWN"
                   << "]\n";
         break;
+    case koterm::event::KeyCode::BACKSPACE:
+        std::cout << "KEY["
+                  << "BACKSPACE"
+                  << "]\n";
+        break;
+    case koterm::event::KeyCode::ENTER:
+        std::cout << "KEY["
+                  << "ENTER"
+                  << "]\n";
+        break;
     }
 }
 

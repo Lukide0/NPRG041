@@ -13,6 +13,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/create_example.cmake)
 option(ENABLE_KOTERM_TESTING "Build and run tests" ON)
 option(BUILD_EXAMPLES "Build examples" ON)
 option(KOTERM_DEBUG "Enable debug build" ON)
+option(KOTERM_DEBUG_DOM "Show elements bounding boxes" OFF)
 option(DISABLE_EXCEPTIONS "Disable c++ exceptions" OFF)
 
 set(LIBRARY_NAME "${PROJECT_NAME}")
@@ -30,8 +31,10 @@ target_include_directories(
 
 target_compile_features(${LIBRARY_NAME} PRIVATE cxx_std_20)
 target_compile_definitions(
-  ${LIBRARY_NAME} PRIVATE $<$<BOOL:${KOTERM_DEBUG}>:KOTERM_DEBUG>
-                          $<$<BOOL:${DISABLE_EXCEPTIONS}>:KOTERM_NO_EXCEPTIONS>)
+  ${LIBRARY_NAME}
+  PRIVATE $<$<BOOL:${KOTERM_DEBUG}>:KOTERM_DEBUG>
+          $<$<BOOL:${KOTERM_DEBUG_DOM}>:KOTERM_DEBUG_DOM>
+          $<$<BOOL:${DISABLE_EXCEPTIONS}>:KOTERM_NO_EXCEPTIONS>)
 
 target_compile_options(${LIBRARY_NAME}
                        PRIVATE $<$<BOOL:${DISABLE_EXCEPTIONS}>:-fexceptions>)
