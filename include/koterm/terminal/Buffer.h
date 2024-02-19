@@ -158,6 +158,9 @@ public:
      */
     [[nodiscard]] unit_t height() const { return m_height; }
 
+    [[nodiscard]] const BoundingBox& box() const { return m_box; }
+    [[nodiscard]] const BoundingBox& render_box() const { return m_render_box; }
+
     /**
      * @brief Gets the style of a pixel in the buffer.
      *
@@ -165,7 +168,7 @@ public:
      * @param y The y-coordinate of the pixel.
      * @return The style of the pixel.
      */
-    [[nodiscard]] PixelStyle get_pixel_style(unit_t x, unit_t y) const;
+    [[nodiscard]] PixelStyle get_pixel_style(unit_t x, unit_t y) const { return m_pixels_style[to_index(x, y)]; }
 
     /**
      * @brief Gets the content of a pixel in the buffer.
@@ -174,7 +177,7 @@ public:
      * @param y The y-coordinate of the pixel.
      * @return The content of the pixel.
      */
-    [[nodiscard]] PixelContent get_pixel_content(unit_t x, unit_t y) const;
+    [[nodiscard]] PixelContent get_pixel_content(unit_t x, unit_t y) const { return m_pixels_content[to_index(x, y)]; }
 
     /**
      * @brief Gets the color of a pixel in the buffer.
@@ -183,7 +186,7 @@ public:
      * @param y The y-coordinate of the pixel.
      * @return The color of the pixel.
      */
-    [[nodiscard]] PixelColor get_pixel_color(unit_t x, unit_t y) const;
+    [[nodiscard]] PixelColor get_pixel_color(unit_t x, unit_t y) const { return m_pixels_color[to_index(x, y)]; }
 
 private:
     unit_t m_width;
@@ -205,6 +208,10 @@ private:
 
 public:
     using buffer_t = std::conditional_t<IS_CONST, const Buffer, Buffer>;
+
+    BufferSpanBase(buffer_t& buffer)
+        : m_buffer(buffer)
+        , m_box(buffer.box()) { }
 
     BufferSpanBase(buffer_t& buffer, const BoundingBox& box)
         : m_buffer(buffer)
@@ -456,8 +463,8 @@ public:
     }
     [[nodiscard]] const BoundingBox& box() const { return m_box; }
 
-    [[nodiscard]] unit_t width() const { return m_box.right - m_box.left; }
-    [[nodiscard]] unit_t height() const { return m_box.bottom - m_box.top; }
+    [[nodiscard]] unit_t width() const { return m_box.width(); }
+    [[nodiscard]] unit_t height() const { return m_box.height(); }
 
 private:
     buffer_t& m_buffer;

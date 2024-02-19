@@ -24,6 +24,14 @@ public:
         STRIKETHROUGH,
     };
 
+    PixelStyle() = default;
+
+    template <StyleFlags Flags> static constexpr PixelStyle from() {
+        PixelStyle style;
+        style.m_style |= bits::create_mask<Flags>();
+
+        return style;
+    }
     template <StyleFlags FLAG> void set() { m_style |= bits::bit<FLAG>(); }
     template <StyleFlags FLAG> void unset() { m_style &= ~bits::create_inverse_mask<FLAG>(); }
 

@@ -39,6 +39,19 @@ struct BoundingBox {
     unit_t left;
     unit_t right;
 
+    [[nodiscard]] constexpr unit_t width() const { return right - left; }
+    [[nodiscard]] constexpr unit_t height() const { return bottom - top; }
+
+    [[nodiscard]] bool can_shrink(unit_t n = 1) const { return width() >= n && height() >= n; }
+
+    void shrink(unit_t n = 1) {
+
+        top += n;
+        bottom -= n;
+        left += n;
+        right -= n;
+    }
+
     /**
      * @brief Checks if two BoundingBoxes intersect.
      *

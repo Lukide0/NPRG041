@@ -5,6 +5,7 @@
 #include "koterm/unit.h"
 #include "koterm/util/bits.h"
 #include <cstdint>
+#include <functional>
 #include <string_view>
 
 namespace koterm::terminal {
@@ -33,6 +34,8 @@ using Features = util::bit_flags<FeatureFlags>;
  * @return True if initialization is successful; otherwise, false.
  */
 bool init(Features features);
+
+bool register_exit_handle(std::function<void()> handle);
 
 /**
  * @brief Checks if the terminal has been initialized.

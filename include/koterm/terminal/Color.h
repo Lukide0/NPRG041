@@ -27,7 +27,8 @@ public:
         , m_g(g)
         , m_b(b) { }
 
-    consteval Color(std::string_view hex) {
+    consteval Color(std::string_view hex)
+        : m_type(Type::RGB) {
         if (!hex.starts_with('#')) {
             throw "Invalid color!";
         }

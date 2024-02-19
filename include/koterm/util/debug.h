@@ -9,7 +9,15 @@ consteval bool debug_mode() {
 #ifndef KOTERM_DEBUG
     return false;
 #else
+    return true;
+#endif
+}
+
+consteval bool debug_dom() {
+#ifndef KOTERM_DEBUG_DOM
     return false;
+#else
+    return true;
 #endif
 }
 

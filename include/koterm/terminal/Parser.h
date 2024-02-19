@@ -3,6 +3,7 @@
 
 #include "koterm/event/KeyCodes.h"
 #include "koterm/unit.h"
+#include "koterm/util/ascii.h"
 #include "koterm/util/bits.h"
 #include "koterm/util/utf8.h"
 #include <cstdint>
@@ -62,6 +63,7 @@ public:
     [[nodiscard]] EventType event_type() const { return m_type; }
     [[nodiscard]] const MouseEvent& mouse() const { return m_mouse; }
     [[nodiscard]] event::KeyCode key() const { return m_key; }
+    [[nodiscard]] util::ascii::codes code() const { return static_cast<util::ascii::codes>(m_buffer[0]); }
     [[nodiscard]] point_t cursor() const { return m_cursor; }
 
     [[nodiscard]] std::string_view text() const {

@@ -22,6 +22,8 @@ public:
     void set_style(Style style) { m_style = style; }
     [[nodiscard]] Style style() const { return m_style; }
 
+    [[nodiscard]] bool has() const { return m_style != Style::NONE; }
+
     void render(terminal::BufferSpan& buffer);
 
 private:

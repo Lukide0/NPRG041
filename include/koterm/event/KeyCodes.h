@@ -29,6 +29,9 @@ enum class KeyCode : std::uint8_t {
     END,
     PAGE_UP,
     PAGE_DOWN,
+
+    BACKSPACE,
+    ENTER,
 };
 
 }
