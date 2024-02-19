@@ -34,7 +34,7 @@ public:
         static constexpr std::uint8_t BUTTON_BIT  = 5;
         static constexpr std::uint8_t WHEEL_BIT   = 6;
 
-        [[nodiscard]] bool btn1_press() const { return !bits::is_set<MB1_BIT>(code); }
+        [[nodiscard]] bool btn1_press() const { return !bits::is_set<MB1_BIT>(code) && !bits::is_set<MB3_BIT>(code); }
         [[nodiscard]] bool btn2_press() const { return bits::is_set<MB2_BIT>(code); }
         [[nodiscard]] bool btn3_press() const { return bits::is_set<MB3_BIT>(code); }
         [[nodiscard]] bool btn_release() const { return bits::is_set<0, 1>(code); }
