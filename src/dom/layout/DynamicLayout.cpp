@@ -1,4 +1,4 @@
-#include "koterm/dom/layout/Layout.h"
+#include "koterm/dom/layout/DynamicLayout.h"
 #include "koterm/BoundingBox.h"
 #include "koterm/Dimensions.h"
 #include "koterm/dom/Element.h"
@@ -7,14 +7,14 @@
 
 namespace koterm::dom::layout {
 
-void Layout::add_element(element_t element) {
+void DynamicLayout::add_element(element_t element) {
     element->set_parent(this);
     m_elements.insert(element);
 
     request_update();
 }
 
-void Layout::add_elements(const element_container_t& elements) {
+void DynamicLayout::add_elements(const element_container_t& elements) {
     for (auto&& element : elements) {
         element->set_parent(this);
     }
@@ -23,7 +23,7 @@ void Layout::add_elements(const element_container_t& elements) {
     request_update();
 }
 
-void Layout::remove_element(element_ref element) {
+void DynamicLayout::remove_element(element_ref element) {
     auto it = std::find_if(m_elements.begin(), m_elements.end(), [element](const element_t& el) -> bool {
         return el.get() == element;
     });
@@ -34,18 +34,29 @@ void Layout::remove_element(element_ref element) {
     }
 }
 
-void Layout::handle_event(const event::Event& event) {
+bool DynamicLayout::handle_event(const event::Event& event) {
     for (auto&& element : m_elements) {
-        element->handle_event(event);
+        if (element->handle_event(event)) {
+            return true;
+        }
     }
+    return false;
 }
 
-void Layout::remove_child(element_ref child) {
+bool DynamicLayout::has_child(element_ref element) const {
+    const auto it = std::find_if(m_elements.begin(), m_elements.end(), [element](const element_t& el) -> bool {
+        return el.get() == element;
+    });
+
+    return it != m_elements.end();
+}
+
+void DynamicLayout::remove_child(element_ref child) {
     remove_element(child);
     request_update();
 }
 
-void Layout::prepare_buffer() {
+void DynamicLayout::prepare_buffer() {
 
     update_layout();
 

@@ -1,5 +1,6 @@
 #include "koterm/terminal/terminal.h"
 #include "koterm/Dimensions.h"
+#include "koterm/terminal/Cursor.h"
 #include "koterm/terminal/ansi.h"
 #include "koterm/util/discard.h"
 #include "koterm/util/os.h"
@@ -33,11 +34,13 @@ struct TermInfo {
     std::stack<std::function<void()>> on_exit;
 
     void exit() {
+        Cursor::move(0, 0);
         while (!on_exit.empty()) {
-            const auto& func = on_exit.top();
+            std::function<void()> func = on_exit.top();
             func();
             on_exit.pop();
         }
+        std::cout.flush();
     }
 
     ~TermInfo() { exit(); }
@@ -80,12 +83,12 @@ void add_signal_handler(int sig) {
 
 void enable_feature(ansi::Features feature) {
     std::cout << ansi::CPM << static_cast<int>(feature) << 'h';
-    g_terminfo->on_exit.emplace([feature]() { std::cout << ansi::CPM << static_cast<int>(feature) << 'l'; });
+    g_terminfo->on_exit.emplace([=]() { std::cout << ansi::CPM << static_cast<int>(feature) << 'l'; });
 }
 
 void disable_feature(ansi::Features feature) {
     std::cout << ansi::CPM << static_cast<int>(feature) << 'l';
-    g_terminfo->on_exit.emplace([feature]() { std::cout << ansi::CPM << static_cast<int>(feature) << 'h'; });
+    g_terminfo->on_exit.emplace([=]() { std::cout << ansi::CPM << static_cast<int>(feature) << 'h'; });
 }
 
 bool has_initialized() { return g_terminfo != nullptr; }
@@ -118,6 +121,10 @@ bool init(Features features = FeatureFlags::NONE) {
     // line wrapping
     disable_feature(ansi::Features::AUTO_WRAP);
 
+    if (features.contains<FeatureFlags::ALTERNATIVE_SCREEN>()) {
+        enable_feature(ansi::Features::ALTERNATIVE_SCREEN);
+    }
+
     if (features.contains<FeatureFlags::MOUSE_SUPPORT>()) {
         // enable mouse tracking
         enable_feature(ansi::Features::VT200_MOUSE);
@@ -125,10 +132,6 @@ bool init(Features features = FeatureFlags::NONE) {
         enable_feature(ansi::Features::ANY_EVENT_MOUSE);
         // Extend position from 223 to 2015
         enable_feature(ansi::Features::EXT_MODE_MOUSE);
-    }
-
-    if (features.contains<FeatureFlags::ALTERNATIVE_SCREEN>()) {
-        enable_feature(ansi::Features::ALTERNATIVE_SCREEN);
     }
 
 #ifdef OS_LINUX
@@ -164,6 +167,8 @@ bool init(Features features = FeatureFlags::NONE) {
     }
 
 #endif
+    g_terminfo->on_exit.emplace([] { std::cout.flush(); });
+
     update_dimensions();
 
     std::cout.flush();

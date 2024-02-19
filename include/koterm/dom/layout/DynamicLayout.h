@@ -1,21 +1,19 @@
-#ifndef KOTERM_DOM_LAYOUT_LAYOUT_H
-#define KOTERM_DOM_LAYOUT_LAYOUT_H
+#ifndef KOTERM_DOM_LAYOUT_DYNAMICLAYOUT_H
+#define KOTERM_DOM_LAYOUT_DYNAMICLAYOUT_H
 
-#include "koterm/BoundingBox.h"
-#include "koterm/Dimensions.h"
 #include "koterm/dom/Element.h"
 #include "koterm/event/Event.h"
-#include "koterm/unit.h"
-#include <span>
+
 namespace koterm::dom::layout {
 
-class Layout : public Element {
+class DynamicLayout : public Element {
 public:
     void add_element(element_t element);
     void add_elements(const element_container_t& elements);
     void remove_element(element_ref element);
 
-    void handle_event(const event::Event& event) override;
+    bool handle_event(const event::Event& event) override;
+    bool has_child(element_ref element) const override;
 
     virtual void update_layout() = 0;
 

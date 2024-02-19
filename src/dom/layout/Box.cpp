@@ -39,7 +39,7 @@ template <BoxDirection Direction> void Box<Direction>::calculate_requirements() 
             const auto& info = el->requirements();
 
             if constexpr (Direction == BoxDirection::HORIZONTAL) {
-                min_width += info.min_width;
+                min_width += info.min_width + 1;
                 min_height = std::max(min_height, info.min_height);
 
                 if (m_info.shrink_x == 0) {
@@ -47,7 +47,7 @@ template <BoxDirection Direction> void Box<Direction>::calculate_requirements() 
                 }
 
             } else {
-                min_height += info.min_height;
+                min_height += info.min_height + 1;
                 min_width = std::max(min_width, info.min_width);
 
                 if (m_info.shrink_y == 0) {
@@ -70,6 +70,16 @@ template <BoxDirection Direction> void Box<Direction>::calculate_requirements() 
         gaps_size -= m_gap;
         if (m_shrink_min_size > 0) {
             m_shrink_min_size -= m_gap;
+        }
+    }
+
+    if constexpr (Direction == BoxDirection::HORIZONTAL) {
+        if (min_width > 0) {
+            min_width -= 1;
+        }
+    } else {
+        if (min_height > 0) {
+            min_height -= 1;
         }
     }
 
@@ -120,7 +130,7 @@ void Box<Direction>::update_layout_grow(unit_t min_size, unit_t target_size, uni
             el->handle_change_box({ offset, offset + size, box.left, box.right });
         }
 
-        offset += size + m_gap;
+        offset += size + m_gap + 1;
     }
 }
 
@@ -157,7 +167,7 @@ void Box<Direction>::update_layout_shrink(unit_t min_size, unit_t target_size, s
             el->handle_change_box({ offset, offset + new_size, box.left, box.right });
         }
 
-        offset += size + m_gap;
+        offset += size + m_gap + 1;
     }
 }
 
@@ -186,7 +196,7 @@ template <BoxDirection Direction> void Box<Direction>::update_layout_shrink_forc
             el->handle_change_box({ offset, offset + size, box.left, box.right });
         }
 
-        offset += size + m_gap;
+        offset += size + m_gap + 1;
     }
 }
 

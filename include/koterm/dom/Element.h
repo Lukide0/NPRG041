@@ -5,12 +5,19 @@
 #include "koterm/Dimensions.h"
 #include "koterm/event/Event.h"
 #include "koterm/event/KeyCodes.h"
+#include "koterm/screen/pallete/Pallete.h"
 #include "koterm/terminal/Buffer.h"
 #include "koterm/unit.h"
+#include <concepts>
 #include <cstdint>
 #include <memory>
 #include <set>
 #include <vector>
+
+namespace koterm::screen {
+class BaseScreen;
+}
+
 namespace koterm::dom {
 
 class DomManager;
@@ -49,8 +56,10 @@ struct ElementInfo {
 class Element {
 public:
     using BufferSpan = terminal::BufferSpan;
+    using Ascii      = util::ascii::codes;
 
-    Element(const terminal::BufferSpan& buffer, DomManager* manager);
+    Element(const BufferSpan& buffer, DomManager* manager);
+    Element(screen::BaseScreen* screen);
     virtual ~Element();
 
     void show();
@@ -59,24 +68,27 @@ public:
 
     void focus();
     void blur();
+    [[nodiscard]] bool focusable() const { return m_focusable; }
     [[nodiscard]] bool has_focus() const { return m_focused; }
 
     void render();
     [[nodiscard]] unit_t width() const { return m_buffer.width(); }
     [[nodiscard]] unit_t height() const { return m_buffer.height(); }
     [[nodiscard]] element_const_ref parent() const { return m_parent; }
+    [[nodiscard]] element_ref parent() { return m_parent; }
 
     void set_parent(element_ref parent) { m_parent = parent; }
 
-    virtual void handle_event(const event::Event& event);
-    virtual void handle_resize(const Dimensions& dimensions);
-    virtual void handle_change_box(const BoundingBox& box);
-    virtual void handle_mouse_move(const event::MouseEvent& event);
-    virtual void handle_mouse_click(const event::MouseEvent& event);
-    virtual void handle_mouse_scroll(const event::MouseEvent& event);
-    virtual void handle_input(const event::CharacterEvent& event);
-    virtual void handle_cursor(const point_t& cursor);
-    virtual void handle_key(event::KeyCode key);
+    virtual bool handle_event(const event::Event& event);
+    virtual bool handle_resize(const Dimensions& dimensions);
+    virtual bool handle_change_box(const BoundingBox& box);
+    virtual bool handle_mouse_move(const event::MouseEvent& event);
+    virtual bool handle_mouse_click(const event::MouseEvent& event);
+    virtual bool handle_mouse_scroll(const event::MouseEvent& event);
+    virtual bool handle_input(const event::CharacterEvent& event);
+    virtual bool handle_cursor(const point_t& cursor);
+    virtual bool handle_key(event::KeyCode key);
+    virtual bool handle_special_input(Ascii code);
 
     [[nodiscard]] const ElementInfo& requirements() const { return m_info; }
     void update_requirements() {
@@ -95,13 +107,18 @@ public:
         m_info.shrink_y = y;
     }
 
+    virtual bool has_child(element_ref element) const;
+
 protected:
     virtual void prepare_buffer();
     virtual void remove_child(element_ref child);
 
     void request_render();
 
+    void set_focusable(bool focusable = false) { m_focusable = focusable; }
+
     [[nodiscard]] bool need_update() const { return m_need_update; }
+    [[nodiscard]] const screen::pallete::Pallete& get_pallete() const;
 
     void request_update() {
         m_need_update = true;
@@ -115,6 +132,7 @@ private:
     element_ref m_parent = nullptr;
     bool m_hidden        = false;
     bool m_focused       = false;
+    bool m_focusable     = false;
     bool m_need_update   = false;
     DomManager* m_manager;
 };

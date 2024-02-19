@@ -16,6 +16,15 @@ void DomManager::steal_focus(element_ref element) { m_focused = element; }
 void DomManager::lose_focus(element_ref element) {
     if (m_focused == element) {
         m_focused = nullptr;
+
+        auto* el = element->parent();
+        while (el != nullptr && !el->focusable()) {
+            el = el->parent();
+        }
+
+        if (m_focused != nullptr) {
+            el->focus();
+        }
     }
 }
 

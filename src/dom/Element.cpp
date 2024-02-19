@@ -1,21 +1,30 @@
 #include "koterm/dom/Element.h"
 #include "koterm/BoundingBox.h"
 #include "koterm/Dimensions.h"
+#include "koterm/component/Border.h"
 #include "koterm/dom/DomManager.h"
 #include "koterm/event/Event.h"
 #include "koterm/event/KeyCodes.h"
+#include "koterm/screen/BaseScreen.h"
+#include "koterm/screen/pallete/Pallete.h"
 #include "koterm/terminal/Buffer.h"
 #include "koterm/unit.h"
+#include "koterm/util/ascii.h"
+#include "koterm/util/debug.h"
 
 namespace koterm::dom {
 
 // NOLINTNEXTLINE(modernize-pass-by-value)
-Element::Element(const terminal::BufferSpan& buffer, DomManager* manager)
+Element::Element(const BufferSpan& buffer, DomManager* manager)
     : m_buffer(buffer)
     , m_manager(manager) { }
 
+Element::Element(screen::BaseScreen* screen)
+    : m_buffer(screen->buffer())
+    , m_manager(&screen->dom_manager()) { }
+
 Element::~Element() {
-    if (m_manager != nullptr) {
+    if (m_manager != nullptr && m_focused) {
         m_manager->lose_focus(this);
     }
     if (m_parent != nullptr) {
@@ -23,6 +32,7 @@ Element::~Element() {
     }
 }
 
+const screen::pallete::Pallete& Element::get_pallete() const { return m_manager->get_pallete(); }
 void Element::show() {
     if (!m_hidden) {
         return;
@@ -42,7 +52,7 @@ void Element::hide() {
 }
 
 void Element::focus() {
-    if (m_focused) {
+    if (m_focused || !m_focusable) {
         return;
     }
 
@@ -70,48 +80,57 @@ void Element::render() {
     }
 
     prepare_buffer();
+
+    if constexpr (util::debug_dom()) {
+        component::Border border(component::Border::Style::THIN);
+        border.render(m_buffer);
+    }
 }
 
-void Element::handle_event(const event::Event& event) {
+bool Element::handle_event(const event::Event& event) {
     using event::Event;
 
     switch (event.type()) {
     case Event::EventType::RESIZE:
-        handle_resize(event.get<Event::EventType::RESIZE>());
-        break;
+        return handle_resize(event.get<Event::EventType::RESIZE>());
     case Event::EventType::MOUSE_BTN:
-        handle_mouse_click(event.get<Event::EventType::MOUSE_BTN>());
-        break;
+        return handle_mouse_click(event.get<Event::EventType::MOUSE_BTN>());
     case Event::EventType::MOUSE_SCROLL:
-        handle_mouse_scroll(event.get<Event::EventType::MOUSE_SCROLL>());
-        break;
+        return handle_mouse_scroll(event.get<Event::EventType::MOUSE_SCROLL>());
     case event::Event::EventType::MOUSE_MOVE:
-        handle_mouse_move(event.get<Event::EventType::MOUSE_MOVE>());
-        break;
+        return handle_mouse_move(event.get<Event::EventType::MOUSE_MOVE>());
     case Event::EventType::CHARACTER:
-        handle_input(event.get<Event::EventType::CHARACTER>());
-        break;
+        return handle_input(event.get<Event::EventType::CHARACTER>());
     case Event::EventType::SPECIAL_KEY:
-        handle_key(event.get<Event::EventType::SPECIAL_KEY>());
-        break;
+        return handle_key(event.get<Event::EventType::SPECIAL_KEY>());
     case Event::EventType::CURSOR:
-        handle_cursor(event.get<Event::EventType::CURSOR>());
-        break;
+        return handle_cursor(event.get<Event::EventType::CURSOR>());
+    case Event::EventType::SPECIAL_CHARACTER:
+        return handle_special_input(event.get<Event::EventType::SPECIAL_CHARACTER>());
+    case Event::EventType::NONE:
+        return false;
     }
+
+    return false;
 }
 
-void Element::handle_change_box(const BoundingBox& box) {
+bool Element::handle_change_box(const BoundingBox& box) {
     m_buffer.resize(box);
     request_update();
+    return true;
 }
-void Element::handle_resize([[maybe_unused]] const Dimensions& dimensions) { }
+
+bool Element::has_child([[maybe_unused]] element_ref element) const { return false; }
+
+bool Element::handle_resize([[maybe_unused]] const Dimensions& dimensions) { return false; }
 void Element::prepare_buffer() { }
-void Element::handle_mouse_move([[maybe_unused]] const event::MouseEvent& event) { }
-void Element::handle_mouse_click([[maybe_unused]] const event::MouseEvent& event) { }
-void Element::handle_mouse_scroll([[maybe_unused]] const event::MouseEvent& event) { }
-void Element::handle_input([[maybe_unused]] const event::CharacterEvent& event) { }
-void Element::handle_cursor([[maybe_unused]] const point_t& cursor) { }
-void Element::handle_key([[maybe_unused]] event::KeyCode key) { }
+bool Element::handle_mouse_move([[maybe_unused]] const event::MouseEvent& event) { return false; }
+bool Element::handle_mouse_click([[maybe_unused]] const event::MouseEvent& event) { return false; }
+bool Element::handle_mouse_scroll([[maybe_unused]] const event::MouseEvent& event) { return false; }
+bool Element::handle_input([[maybe_unused]] const event::CharacterEvent& event) { return false; }
+bool Element::handle_cursor([[maybe_unused]] const point_t& cursor) { return false; }
+bool Element::handle_key([[maybe_unused]] event::KeyCode key) { return false; }
+bool Element::handle_special_input([[maybe_unused]] util::ascii::codes code) { return false; }
 void Element::remove_child([[maybe_unused]] element_ref child) { }
 void Element::request_render() { m_manager->request_render(); }
 
