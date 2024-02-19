@@ -176,6 +176,15 @@ Dimensions dimensions() { return g_terminfo->dimensions; }
 Features features() { return g_terminfo->features; }
 std::string_view error_msg() { return g_terminfo->error; }
 
+bool register_exit_handle(std::function<void()> handle) {
+    if (!has_initialized()) {
+        return false;
+    }
+
+    g_terminfo->on_exit.push(handle);
+    return true;
+}
+
 #ifdef OS_LINUX
 bool input_available() {
     timeval tv;

@@ -1,11 +1,17 @@
 #include "koterm/terminal/Parser.h"
+#include "koterm/event/KeyCodes.h"
 #include "koterm/unit.h"
 #include "koterm/util/ConstMap.h"
 #include "koterm/util/ascii.h"
+#include <array>
 #include <charconv>
+#include <cstddef>
 #include <cstdint>
+#include <iterator>
 #include <span>
 #include <string_view>
+#include <system_error>
+#include <utility>
 
 /**
  * Mouse tracking modes in xterm.
@@ -46,14 +52,26 @@ Parser::ParserState Parser::parse(std::uint8_t byte) {
 
     std::uint8_t code = m_buffer.front();
 
-    if (code == codes::ESC) {
+    switch (code) {
+    case codes::ESC:
         return parse_esc(std::span { std::next(m_buffer.begin()), m_buffer.end() });
-    } else if (code < util::ascii::END_SPECIAL || code == codes::DELETE) {
-        return ParserState::SPECIAL;
+    case codes::DELETE:
+    case codes::BACKSPACE:
+        m_type = EventType::KEY;
+        m_key  = event::KeyCode::BACKSPACE;
+        return ParserState::EVENT;
+    case codes::NEWLINE:
+        m_type = EventType::KEY;
+        m_key  = event::KeyCode::ENTER;
+        return ParserState::EVENT;
+    default:
+        if (code < util::ascii::END_SPECIAL) {
+            return ParserState::SPECIAL;
+        } else {
+            std::size_t tmp;
+            return parse_utf8(m_buffer, tmp);
+        }
     }
-
-    std::size_t tmp;
-    return parse_utf8(m_buffer, tmp);
 }
 
 Parser::ParserState Parser::parse_utf8(span_t content, std::size_t& out_bytes) {
