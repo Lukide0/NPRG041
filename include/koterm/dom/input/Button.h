@@ -9,6 +9,8 @@
 #include "koterm/event/Event.h"
 #include "koterm/event/KeyCodes.h"
 #include "koterm/screen/BaseScreen.h"
+#include "koterm/terminal/Color.h"
+#include "koterm/terminal/colors.h"
 #include <memory>
 
 namespace koterm::dom::input {
@@ -21,6 +23,7 @@ public:
     using border_t  = component::Border;
     using text_t    = component::Text;
     using Alignment = component::Alignment;
+    using Color     = koterm::terminal::Color;
 
     static button_t create(const BufferSpan& buffer, DomManager* manager);
     static button_t create(screen::BaseScreen* screen) {
@@ -46,8 +49,17 @@ public:
         return m_border;
     }
 
+    [[nodiscard]] Color background() const { return m_bg; }
+    [[nodiscard]] Color foreground() const { return m_fg; }
+
+    void set_background(Color color) { m_bg = color; }
+    void set_foreground(Color color) { m_fg = color; }
+
 private:
     using Element::Element;
+
+    Color m_bg = koterm::terminal::colors::SYS_DEFAULT;
+    Color m_fg = koterm::terminal::colors::SYS_DEFAULT;
 
     signal_t m_onpress;
     text_t m_text;
