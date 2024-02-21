@@ -29,7 +29,9 @@ struct MouseEvent {
         : m_data(data)
         , m_btn(btn) { }
 
-    template <Btn BTN> [[nodiscard]] bool btn_pressed() const { return m_btn == BTN && m_data.is_button(); }
+    template <Btn BTN> [[nodiscard]] bool btn_pressed() const {
+        return m_btn == BTN && m_data.is_button() && m_data.btn_press();
+    }
 
     template <Btn BTN> [[nodiscard]] bool btn_released() const {
         return m_btn == BTN && m_data.is_button() && m_data.btn_release();
