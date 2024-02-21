@@ -54,6 +54,9 @@ bool Input::handle_key(event::KeyCode key) {
         remove_at(m_char_index);
         break;
     case event::KeyCode::BACKSPACE:
+        if (m_char_index == 0) {
+            break;
+        }
         m_char_index = std::max(1UL, m_char_index) - 1;
         remove_at(m_char_index);
         break;
