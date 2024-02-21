@@ -110,9 +110,14 @@ void Input::prepare_buffer() {
         color = pallete.foreground;
     }
 
-    for (std::size_t i = 0; i < max_width; i++) {
+    std::size_t offset = 0;
+    if (m_char_index >= max_width) {
+        offset = m_char_index - max_width;
+    }
 
-        m_buffer.set_pixel_content(m_value[i], i, 0);
+    for (std::size_t i = 0; i <= max_width && i + offset <= m_value.size(); i++) {
+
+        m_buffer.set_pixel_content(m_value[i + offset], i, 0);
         m_buffer.set_pixel_style(style, i, 0);
         m_buffer.set_pixel_foreground(color.id(), i, 0);
     }
@@ -120,12 +125,12 @@ void Input::prepare_buffer() {
     if (!has_focus()) {
         return;
     }
-    //
-    // if (m_char_index == m_value.size()) {
-    //     m_buffer.set_pixel_content("█"sv, m_char_index, 0);
-    // } else {
-    //     m_buffer.set_pixel_style(PixelStyle::from<PixelStyle::INVERSE>(), m_char_index, 0);
-    // }
+
+    if (m_char_index == m_value.size()) {
+        m_buffer.set_pixel_content("█"sv, m_char_index - offset, 0);
+    } else {
+        m_buffer.set_pixel_style(PixelStyle::from<PixelStyle::INVERSE>(), m_char_index - offset, 0);
+    }
 }
 
 void Input::calculate_requirements() {
