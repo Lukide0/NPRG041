@@ -10,6 +10,10 @@ void DomManager::handle_event(const event::Event& event) {
     if (m_root_element != nullptr) {
         m_root_element->handle_event(event);
     }
+    if (event.type() == event::Event::EventType::RESIZE) {
+        update_size(event.get<event::Event::EventType::RESIZE>());
+        request_render();
+    }
 }
 
 void DomManager::steal_focus(element_ref element) { m_focused = element; }
