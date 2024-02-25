@@ -9,8 +9,10 @@
 #include "koterm/util/os.h"
 #include <array>
 #include <atomic>
+#include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <span>
 #include <thread>
 
 #ifdef OS_LINUX
@@ -34,9 +36,37 @@
 
 namespace koterm::screen {
 
+static InteractScreen* g_active_screen = nullptr;
+
 void event_emiter(event::EventListener<event::Event>* listener, std::atomic<bool>* quit);
 
-InteractScreen::~InteractScreen() { exit(); }
+InteractScreen::~InteractScreen() {
+    exit();
+    m_parser_thread.join();
+}
+
+void InteractScreen::run() {
+    if (g_active_screen != nullptr) {
+        g_active_screen->exit();
+    }
+
+    g_active_screen = this;
+    m_quit          = false;
+}
+
+void InteractScreen::exit() {
+    if (g_active_screen == this) {
+        g_active_screen = nullptr;
+    }
+
+    m_quit = true;
+}
+
+void stop_active() {
+    if (g_active_screen != nullptr) {
+        g_active_screen->exit();
+    }
+}
 
 std::unique_ptr<InteractScreen> InteractScreen::create(unit_t width, unit_t height) {
     using Features = terminal::FeatureFlags;
@@ -47,6 +77,13 @@ std::unique_ptr<InteractScreen> InteractScreen::create(unit_t width, unit_t heig
 
     if (!terminal::features().contains<Features::NO_ECHO_AND_WAITING>()) {
         return nullptr;
+    }
+
+    static bool has_signal_handler = false;
+    if (!has_signal_handler) {
+
+        std::at_quick_exit(stop_active);
+        has_signal_handler = true;
     }
 
     return std::unique_ptr<InteractScreen>(new InteractScreen(width, height));
@@ -77,6 +114,8 @@ void InteractScreen::main_loop() {
         handle_events();
         try_render();
     }
+
+    m_parser_thread.join();
 }
 
 inline void parse_bytes(
@@ -164,8 +203,6 @@ bool available_input() {
 
 void event_emiter(event::EventListener<event::Event>* listener, std::atomic<bool>* quit) {
     using event::Event;
-    using ParserState     = terminal::Parser::ParserState;
-    using ParserEventType = terminal::Parser::EventType;
 
     auto sender = listener->make_sender();
 
@@ -175,13 +212,15 @@ void event_emiter(event::EventListener<event::Event>* listener, std::atomic<bool
     Dimensions dims                     = terminal::dimensions();
     event::MouseEvent::Btn last_pressed = event::MouseEvent::Btn::NONE;
     while (!quit->load()) {
-        if (terminal::input_available()) {
-            int bytes = read(STDIN_FILENO, buffer.data(), buffer.size());
+        if (available_input()) {
+            long bytes = read(STDIN_FILENO, buffer.data(), buffer.size());
             if (bytes == -1) {
                 continue;
             }
 
-            parse_bytes(std::span<std::uint8_t> { buffer.data(), bytes }, parser, sender, last_pressed);
+            parse_bytes(
+                std::span<std::uint8_t> { buffer.data(), static_cast<std::size_t>(bytes) }, parser, sender, last_pressed
+            );
         } else {
             Dimensions new_dims = terminal::dimensions();
             if (new_dims != dims) {

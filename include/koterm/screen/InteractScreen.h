@@ -21,8 +21,8 @@ public:
     void start_event_listener();
 
     void handle_events();
-    void run() { m_quit = false; }
-    void exit() { m_quit = true; }
+    void run();
+    void exit();
     [[nodiscard]] bool running() const { return !m_quit; }
 
 protected:

@@ -36,7 +36,6 @@
 
 namespace koterm::terminal {
 
-
 constexpr ColorSupport DEFAULT_COLOR_SUPPORT = ColorSupport::COLOR16;
 constexpr Dimensions DEFAULT_DIMS            = { 0, 0 };
 
@@ -60,7 +59,6 @@ struct TermInfo {
 
     ~TermInfo() { exit(); }
 };
-void update_dimensions();
 
 static std::unique_ptr<TermInfo> g_terminfo = nullptr;
 
@@ -108,6 +106,8 @@ void disable_feature(ansi::Features feature) {
 
 bool has_initialized() { return g_terminfo != nullptr; }
 
+void rollback_terminal() { g_terminfo.reset(); }
+
 bool init(Features features = FeatureFlags::NONE) {
     if (has_initialized()) {
         return true;
@@ -116,6 +116,9 @@ bool init(Features features = FeatureFlags::NONE) {
     g_terminfo                = std::make_unique<TermInfo>();
     g_terminfo->color_support = get_color_support();
     g_terminfo->features      = features;
+
+    std::at_quick_exit(rollback_terminal);
+    std::atexit(rollback_terminal);
 
     if (features.contains<FeatureFlags::SUPPORT_TRUE_COLOR>()
         && g_terminfo->color_support != ColorSupport::TRUE_COLOR) {
@@ -225,8 +228,6 @@ bool init(Features features = FeatureFlags::NONE) {
 
 #endif
 
-    g_terminfo->on_exit.emplace([] { std::cout.flush(); });
-
     update_dimensions();
 
     std::cout.flush();
@@ -237,7 +238,10 @@ bool init(Features features = FeatureFlags::NONE) {
 ColorSupport color_support() { return (g_terminfo != nullptr) ? g_terminfo->color_support : DEFAULT_COLOR_SUPPORT; }
 Dimensions dimensions() { return (g_terminfo != nullptr) ? g_terminfo->dimensions : DEFAULT_DIMS; }
 Features features() { return (g_terminfo != nullptr) ? g_terminfo->features : Features {}; }
-std::string_view error_msg() { return (g_terminfo != nullptr) ? g_terminfo->error : ""; }
+std::string_view error_msg() {
+    using namespace std::string_view_literals;
+    return (g_terminfo != nullptr) ? g_terminfo->error : ""sv;
+}
 
 bool register_exit_handle(std::function<void()> handle) {
     if (!has_initialized()) {
@@ -270,8 +274,7 @@ bool is_tty() { return isatty(STDIN_FILENO) == 1; }
 #elif defined(OS_WINDOWS)
 
 void update_dimensions() {
-    if (g_terminfo == nullptr)
-    {
+    if (g_terminfo == nullptr) {
         return;
     }
 
@@ -303,8 +306,7 @@ void handle_signal(int sig) {
 #ifdef OS_LINUX
     case SIGQUIT:
 #endif
-        g_terminfo.reset();
-        std::quick_exit(1);
+        std::quick_exit(0);
         break;
 #ifdef OS_LINUX
     case SIGWINCH:
