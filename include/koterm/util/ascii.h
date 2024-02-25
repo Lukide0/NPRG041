@@ -132,7 +132,7 @@ enum codes : std::uint8_t {
     PIPE                 = '|',
     CLOSE_CURLY_BRACE    = '}',
     TILDE                = '~',
-    DELETE               = 127,
+    DEL                  = 127,
     INVALID              = 128,
 };
 

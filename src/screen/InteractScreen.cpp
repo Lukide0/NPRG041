@@ -244,6 +244,7 @@ void event_emiter(event::EventListener<event::Event>* listener, std::atomic<bool
                 std::span<std::uint8_t> buffer { data_raw, sizeof(wchar_t) };
 
                 parse_bytes(buffer, parser, sender, last_pressed);
+                break;
             }
             case WINDOW_BUFFER_SIZE_EVENT:
                 terminal::update_dimensions();

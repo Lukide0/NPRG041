@@ -14,7 +14,7 @@ template <std::unsigned_integral Storage> struct bits {
     static constexpr std::size_t BITS = sizeof(Storage) * 8;
 
     static constexpr value_t BITS_NONE = 0;
-    static constexpr value_t BITS_ALL  = static_cast<value_t>(-1UL);
+    static constexpr value_t BITS_ALL  = static_cast<value_t>(-1L);
 
     bits() = delete;
 
