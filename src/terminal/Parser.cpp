@@ -55,7 +55,7 @@ Parser::ParserState Parser::parse(std::uint8_t byte) {
     switch (code) {
     case codes::ESC:
         return parse_esc(std::span { std::next(m_buffer.begin()), m_buffer.end() });
-    case codes::DELETE:
+    case codes::DEL:
     case codes::BACKSPACE:
         m_type = EventType::KEY;
         m_key  = event::KeyCode::BACKSPACE;
@@ -275,7 +275,7 @@ Parser::ParserState Parser::parse_key_csi(span_t content) {
         constexpr auto LOOKUP = util::to_map(std::to_array<std::pair<std::uint8_t, KeyCode>>({
             {'1',      KeyCode::HOME},
             {'2',    KeyCode::INSERT},
-            {'3',    KeyCode::DELETE},
+            {'3',       KeyCode::DEL},
             {'4',       KeyCode::END},
             {'5',   KeyCode::PAGE_UP},
             {'6', KeyCode::PAGE_DOWN},
@@ -448,8 +448,7 @@ Parser::ParserState Parser::parse_cursor(span_t content) {
     auto [row_end, row_err]       = std::from_chars(row_ref.data(), row_ref_end, row_value);
     auto [column_end, column_err] = std::from_chars(column_ref.data(), column_ref_end, column_value);
 
-    if (row_err != std::errc() || row_end != row_ref_end || column_err != std::errc()
-        || column_end != column_ref_end) {
+    if (row_err != std::errc() || row_end != row_ref_end || column_err != std::errc() || column_end != column_ref_end) {
         return ParserState::UNKNOWN;
     }
 

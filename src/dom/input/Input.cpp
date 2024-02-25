@@ -50,7 +50,7 @@ bool Input::handle_key(event::KeyCode key) {
     case event::KeyCode::ARROW_RIGHT:
         m_char_index = std::min(m_char_index + 1, m_value.size());
         break;
-    case event::KeyCode::DELETE:
+    case event::KeyCode::DEL:
         remove_at(m_char_index);
         break;
     case event::KeyCode::BACKSPACE:

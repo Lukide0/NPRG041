@@ -36,9 +36,13 @@
 
 namespace koterm::terminal {
 
+
+constexpr ColorSupport DEFAULT_COLOR_SUPPORT = ColorSupport::COLOR16;
+constexpr Dimensions DEFAULT_DIMS            = { 0, 0 };
+
 struct TermInfo {
-    ColorSupport color_support = ColorSupport::COLOR16;
-    Dimensions dimensions      = { 0, 0 };
+    ColorSupport color_support = DEFAULT_COLOR_SUPPORT;
+    Dimensions dimensions      = DEFAULT_DIMS;
     Features features;
     std::string error;
 
@@ -230,10 +234,10 @@ bool init(Features features = FeatureFlags::NONE) {
     return true;
 }
 
-ColorSupport color_support() { return g_terminfo->color_support; }
-Dimensions dimensions() { return g_terminfo->dimensions; }
-Features features() { return g_terminfo->features; }
-std::string_view error_msg() { return g_terminfo->error; }
+ColorSupport color_support() { return (g_terminfo != nullptr) ? g_terminfo->color_support : DEFAULT_COLOR_SUPPORT; }
+Dimensions dimensions() { return (g_terminfo != nullptr) ? g_terminfo->dimensions : DEFAULT_DIMS; }
+Features features() { return (g_terminfo != nullptr) ? g_terminfo->features : Features {}; }
+std::string_view error_msg() { return (g_terminfo != nullptr) ? g_terminfo->error : ""; }
 
 bool register_exit_handle(std::function<void()> handle) {
     if (!has_initialized()) {
@@ -246,6 +250,10 @@ bool register_exit_handle(std::function<void()> handle) {
 
 #ifdef OS_LINUX
 void update_dimensions() {
+    if (g_terminfo == nullptr) {
+        return;
+    }
+
     winsize ws;
 
     if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == -1) {
@@ -262,6 +270,11 @@ bool is_tty() { return isatty(STDIN_FILENO) == 1; }
 #elif defined(OS_WINDOWS)
 
 void update_dimensions() {
+    if (g_terminfo == nullptr)
+    {
+        return;
+    }
+
     CONSOLE_SCREEN_BUFFER_INFO csbi;
     HANDLE console_out = GetStdHandle(STD_OUTPUT_HANDLE);
 

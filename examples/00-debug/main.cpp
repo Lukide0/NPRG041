@@ -293,7 +293,7 @@ void print_event_key(event::KeyCode key) {
                   << "INSERT"
                   << "]\n";
         break;
-    case koterm::event::KeyCode::DELETE:
+    case koterm::event::KeyCode::DEL:
         std::cout << "KEY["
                   << "DELETE"
                   << "]\n";

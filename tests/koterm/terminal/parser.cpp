@@ -230,7 +230,7 @@ TEST_CASE("Parser: Keys") {
         {  "\x1B[H"sv,        KeyCode::HOME},
         {  "\x1B[F"sv,         KeyCode::END},
         { "\x1B[2~"sv,      KeyCode::INSERT},
-        { "\x1B[3~"sv,      KeyCode::DELETE},
+        { "\x1B[3~"sv,         KeyCode::DEL},
         { "\x1B[5~"sv,     KeyCode::PAGE_UP},
         { "\x1B[6~"sv,   KeyCode::PAGE_DOWN},
     });
