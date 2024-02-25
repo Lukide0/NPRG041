@@ -22,8 +22,8 @@ private:
     static constexpr std::uint8_t BOTTOM_OFFSET = 4;
     static constexpr std::uint8_t LEFT_OFFSET   = 6;
 
-    [[nodiscard]] constexpr std::uint8_t get_value(std::uint8_t offset) const { return (encoding >> offset) & MASK; }
-    [[nodiscard]] constexpr std::uint8_t get_part(std::uint8_t offset) const { return (MASK << offset) & encoding; }
+    [[nodiscard]] constexpr std::uint8_t get_value(std::uint8_t offset) const { return static_cast<std::uint8_t>((encoding >> offset) & MASK); }
+    [[nodiscard]] constexpr std::uint8_t get_part(std::uint8_t offset) const { return static_cast<std::uint8_t>((MASK << offset) & encoding); }
 
 public:
     static constexpr std::uint8_t NONE       = 0;

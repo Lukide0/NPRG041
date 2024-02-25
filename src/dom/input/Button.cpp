@@ -18,7 +18,7 @@ void Button::prepare_buffer() {
 
     m_buffer.clear();
 
-    auto text_box = m_buffer.box();
+    BoundingBox text_box = m_buffer.box();
 
     unit_t width  = m_buffer.width();
     unit_t height = m_buffer.height();
@@ -51,7 +51,7 @@ void Button::prepare_buffer() {
 }
 
 void Button::calculate_requirements() {
-    m_info.min_width  = m_text.size();
+    m_info.min_width  = static_cast<unit_t>(m_text.size());
     m_info.min_height = 2;
 
     if (m_border.has()) {

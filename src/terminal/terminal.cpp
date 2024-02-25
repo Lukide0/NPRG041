@@ -21,13 +21,24 @@
 #include <termios.h>
 #include <unistd.h>
 
+#elif defined(OS_WINDOWS)
+
+#define WIN32_LEAN_AND_MEAN
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
+#include <Windows.h>
+#include <io.h>
+
 #endif
 
 namespace koterm::terminal {
 
 struct TermInfo {
-    ColorSupport color_support;
-    Dimensions dimensions;
+    ColorSupport color_support = ColorSupport::COLOR16;
+    Dimensions dimensions      = { 0, 0 };
     Features features;
     std::string error;
 
@@ -118,6 +129,48 @@ bool init(Features features = FeatureFlags::NONE) {
         add_signal_handler(signal);
     }
 
+#ifdef OS_WINDOWS
+
+    HANDLE console_out = GetStdHandle(STD_OUTPUT_HANDLE);
+    HANDLE console_in  = GetStdHandle(STD_INPUT_HANDLE);
+
+    DWORD mode_out = 0;
+    DWORD mode_in  = 0;
+
+    SetConsoleOutputCP(CP_UTF8);
+
+    if (console_in == INVALID_HANDLE_VALUE || !GetConsoleMode(console_in, &mode_in)) {
+        g_terminfo->exit();
+        g_terminfo->error = "failed to retrieve console input mode";
+        return false;
+    }
+
+    if (console_out == INVALID_HANDLE_VALUE || !GetConsoleMode(console_out, &mode_out)) {
+        g_terminfo->exit();
+        g_terminfo->error = "failed to retrieve console output mode";
+        return false;
+    }
+
+    g_terminfo->on_exit.push([=] { SetConsoleMode(console_in, mode_in); });
+    g_terminfo->on_exit.push([=] { SetConsoleMode(console_out, mode_out); });
+
+    mode_out |= ENABLE_VIRTUAL_TERMINAL_PROCESSING | DISABLE_NEWLINE_AUTO_RETURN;
+    mode_in |= ENABLE_VIRTUAL_TERMINAL_INPUT | ENABLE_WINDOW_INPUT;
+
+    if (features.contains<FeatureFlags::NO_ECHO_AND_WAITING>()) {
+
+        mode_in &= ~ENABLE_ECHO_INPUT;
+        mode_in &= ~ENABLE_LINE_INPUT;
+    }
+
+    if (!SetConsoleMode(console_in, mode_in) || !SetConsoleMode(console_out, mode_out)) {
+        g_terminfo->exit();
+        g_terminfo->error = "failed to set up terminal modes for input and output";
+        return false;
+    }
+
+#endif
+
     // line wrapping
     disable_feature(ansi::Features::AUTO_WRAP);
 
@@ -167,6 +220,7 @@ bool init(Features features = FeatureFlags::NONE) {
     }
 
 #endif
+
     g_terminfo->on_exit.emplace([] { std::cout.flush(); });
 
     update_dimensions();
@@ -191,21 +245,6 @@ bool register_exit_handle(std::function<void()> handle) {
 }
 
 #ifdef OS_LINUX
-bool input_available() {
-    timeval tv;
-    tv.tv_sec  = 0;
-    tv.tv_usec = 0;
-
-    fd_set fds;
-
-    FD_ZERO(&fds);
-    FD_SET(STDIN_FILENO, &fds);
-
-    select(STDIN_FILENO + 1, &fds, nullptr, nullptr, &tv);
-
-    return FD_ISSET(STDIN_FILENO, &fds);
-}
-
 void update_dimensions() {
     winsize ws;
 
@@ -219,6 +258,25 @@ void update_dimensions() {
 }
 
 bool is_tty() { return isatty(STDIN_FILENO) == 1; }
+
+#elif defined(OS_WINDOWS)
+
+void update_dimensions() {
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    HANDLE console_out = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    if (console_out == INVALID_HANDLE_VALUE || !GetConsoleScreenBufferInfo(console_out, &csbi)) {
+        g_terminfo->dimensions.height = 0;
+        g_terminfo->dimensions.width  = 0;
+        return;
+    }
+
+    g_terminfo->dimensions.width  = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+    g_terminfo->dimensions.height = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+}
+
+bool is_tty() { return _isatty(_fileno(stdin)); }
+
 #endif
 
 void handle_signal(int sig) {
@@ -229,7 +287,9 @@ void handle_signal(int sig) {
     case SIGILL:
     case SIGABRT:
     case SIGFPE:
+#ifdef OS_LINUX
     case SIGQUIT:
+#endif
         g_terminfo.reset();
         std::quick_exit(1);
         break;

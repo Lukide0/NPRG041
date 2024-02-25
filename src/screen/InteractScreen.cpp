@@ -13,6 +13,25 @@
 #include <memory>
 #include <thread>
 
+#ifdef OS_LINUX
+
+#include <sys/select.h>
+#include <termios.h>
+#include <unistd.h>
+
+#elif defined(OS_WINDOWS)
+
+#define WIN32_LEAN_AND_MEAN
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
+#include <Windows.h>
+#include <io.h>
+
+#endif
+
 namespace koterm::screen {
 
 void event_emiter(event::EventListener<event::Event>* listener, std::atomic<bool>* quit);
@@ -60,7 +79,89 @@ void InteractScreen::main_loop() {
     }
 }
 
+inline void parse_bytes(
+    const std::span<std::uint8_t>& bytes,
+    terminal::Parser& parser,
+    event::EventSender<event::Event>& sender,
+    event::MouseEvent::Btn& last_pressed
+) {
+    using event::Event;
+    using ParserState     = terminal::Parser::ParserState;
+    using ParserEventType = terminal::Parser::EventType;
+
+    for (auto&& byte : bytes) {
+        switch (parser.parse(byte)) {
+        case ParserState::UNCOMPLETE:
+            break;
+        case ParserState::UNKNOWN:
+            parser.clear();
+            break;
+        case ParserState::EVENT:
+            switch (parser.event_type()) {
+            case ParserEventType::MOUSE: {
+                const auto& mouse = parser.mouse();
+                if (!mouse.is_button()) {
+                    sender.send(Event::create_from_mouse(mouse));
+                    break;
+                }
+
+                if (mouse.btn_release()) {
+                    sender.send(Event::create_from_mouse(mouse, last_pressed));
+                    last_pressed = event::MouseEvent::Btn::NONE;
+                    break;
+                }
+
+                if (mouse.btn3_press()) {
+                    last_pressed = event::MouseEvent::Btn::RIGHT;
+                } else if (mouse.btn2_press()) {
+                    last_pressed = event::MouseEvent::Btn::MIDDLE;
+                } else {
+                    last_pressed = event::MouseEvent::Btn::LEFT;
+                }
+
+                sender.send(Event::create_from_mouse(mouse, last_pressed));
+                break;
+            }
+            case ParserEventType::KEY:
+                sender.send(Event::create_key(parser.key()));
+                break;
+            case ParserEventType::CURSOR:
+                sender.send(Event::create_cursor(parser.cursor()));
+                break;
+            default:
+                break;
+            }
+            parser.clear();
+            break;
+        case ParserState::CHARACTER:
+            sender.send(Event::create_character(parser.text()));
+            parser.clear();
+            break;
+        case ParserState::SPECIAL:
+            sender.send(Event::create_special_character(parser.code()));
+            parser.clear();
+            break;
+        }
+    }
+}
+
 #ifdef OS_LINUX
+
+bool available_input() {
+    timeval tv;
+    tv.tv_sec  = 0;
+    tv.tv_usec = 0;
+
+    fd_set fds;
+
+    FD_ZERO(&fds);
+    FD_SET(STDIN_FILENO, &fds);
+
+    select(STDIN_FILENO + 1, &fds, nullptr, nullptr, &tv);
+
+    return FD_ISSET(STDIN_FILENO, &fds);
+}
+
 void event_emiter(event::EventListener<event::Event>* listener, std::atomic<bool>* quit) {
     using event::Event;
     using ParserState     = terminal::Parser::ParserState;
@@ -73,67 +174,14 @@ void event_emiter(event::EventListener<event::Event>* listener, std::atomic<bool
 
     Dimensions dims                     = terminal::dimensions();
     event::MouseEvent::Btn last_pressed = event::MouseEvent::Btn::NONE;
-    while (!(*quit)) {
+    while (!quit->load()) {
         if (terminal::input_available()) {
             int bytes = read(STDIN_FILENO, buffer.data(), buffer.size());
             if (bytes == -1) {
                 continue;
             }
 
-            for (int i = 0; i < bytes; i++) {
-                switch (parser.parse(buffer[i])) {
-                case ParserState::UNCOMPLETE:
-                    break;
-                case ParserState::UNKNOWN:
-                    parser.clear();
-                    break;
-                case ParserState::EVENT:
-                    switch (parser.event_type()) {
-                    case ParserEventType::MOUSE: {
-                        const auto& mouse = parser.mouse();
-                        if (!mouse.is_button()) {
-                            sender.send(Event::create_from_mouse(mouse));
-                            break;
-                        }
-
-                        if (mouse.btn_release()) {
-                            sender.send(Event::create_from_mouse(mouse, last_pressed));
-                            last_pressed = event::MouseEvent::Btn::NONE;
-                            break;
-                        }
-
-                        if (mouse.btn3_press()) {
-                            last_pressed = event::MouseEvent::Btn::RIGHT;
-                        } else if (mouse.btn2_press()) {
-                            last_pressed = event::MouseEvent::Btn::MIDDLE;
-                        } else {
-                            last_pressed = event::MouseEvent::Btn::LEFT;
-                        }
-
-                        sender.send(Event::create_from_mouse(mouse, last_pressed));
-                        break;
-                    }
-                    case ParserEventType::KEY:
-                        sender.send(Event::create_key(parser.key()));
-                        break;
-                    case ParserEventType::CURSOR:
-                        sender.send(Event::create_cursor(parser.cursor()));
-                        break;
-                    default:
-                        break;
-                    }
-                    parser.clear();
-                    break;
-                case ParserState::CHARACTER:
-                    sender.send(Event::create_character(parser.text()));
-                    parser.clear();
-                    break;
-                case ParserState::SPECIAL:
-                    sender.send(Event::create_special_character(parser.code()));
-                    parser.clear();
-                    break;
-                }
-            }
+            parse_bytes(std::span<std::uint8_t> { buffer.data(), bytes }, parser, sender, last_pressed);
         } else {
             Dimensions new_dims = terminal::dimensions();
             if (new_dims != dims) {
@@ -142,6 +190,72 @@ void event_emiter(event::EventListener<event::Event>* listener, std::atomic<bool
             }
         }
     }
+}
+
+#elif defined(OS_WINDOWS)
+
+void event_emiter(event::EventListener<event::Event>* listener, std::atomic<bool>* quit) {
+    using event::Event;
+    using ParserState     = terminal::Parser::ParserState;
+    using ParserEventType = terminal::Parser::EventType;
+
+    constexpr int TIMEOUT_MS          = 250;
+    constexpr std::size_t BUFFER_SIZE = 64;
+
+    auto sender = listener->make_sender();
+
+    auto parser                         = terminal::Parser();
+    Dimensions dims                     = terminal::dimensions();
+    event::MouseEvent::Btn last_pressed = event::MouseEvent::Btn::NONE;
+
+    HANDLE console_in = GetStdHandle(STD_INPUT_HANDLE);
+
+    std::vector<INPUT_RECORD> records { BUFFER_SIZE };
+
+    while (!quit->load()) {
+        const auto wait = WaitForSingleObject(console_in, TIMEOUT_MS);
+        if (wait != WAIT_OBJECT_0) {
+            continue;
+        }
+
+        DWORD events_count = 0;
+        if (!GetNumberOfConsoleInputEvents(console_in, &events_count) || events_count <= 0) {
+            continue;
+        }
+
+        records.reserve(events_count);
+        DWORD read_events = 0;
+        ReadConsoleInput(console_in, records.data(), events_count, &read_events);
+
+        records.resize(read_events);
+
+        for (const auto& record : records) {
+            switch (record.EventType) {
+            case KEY_EVENT: {
+                const auto& key = record.Event.KeyEvent;
+
+                if (key.bKeyDown == false) {
+                    break;
+                }
+
+                wchar_t key_data = key.uChar.UnicodeChar;
+                auto* data_raw   = reinterpret_cast<std::uint8_t*>(&key_data);
+
+                std::span<std::uint8_t> buffer { data_raw, sizeof(wchar_t) };
+
+                parse_bytes(buffer, parser, sender, last_pressed);
+            }
+            case WINDOW_BUFFER_SIZE_EVENT:
+                terminal::update_dimensions();
+                sender.send(Event::create_resize(terminal::dimensions()));
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    CloseHandle(console_in);
 }
 #endif
 }

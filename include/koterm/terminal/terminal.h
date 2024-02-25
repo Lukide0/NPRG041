@@ -72,12 +72,7 @@ Features features();
  */
 bool is_tty();
 
-/**
- * @brief Checks if there is input available in the terminal.
- *
- * @return True if input is available; otherwise, false.
- */
-bool input_available();
+void update_dimensions();
 
 void handle_signal(int sig);
 std::string_view error_msg();

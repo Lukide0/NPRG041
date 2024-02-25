@@ -39,16 +39,16 @@ public:
 
         // #rgb
         if (hex.size() == 4) {
-            blue  = extract_value(hex[1]) | (extract_value(hex[1]) << 4);
-            green = extract_value(hex[2]) | (extract_value(hex[2]) << 4);
-            red   = extract_value(hex[3]) | (extract_value(hex[3]) << 4);
+            blue  = static_cast<std::uint8_t>(extract_value(hex[1]) | (extract_value(hex[1]) << 4));
+            green = static_cast<std::uint8_t>(extract_value(hex[2]) | (extract_value(hex[2]) << 4));
+            red   = static_cast<std::uint8_t>(extract_value(hex[3]) | (extract_value(hex[3]) << 4));
 
         }
         // #rrggbb
         else if (hex.size() == 7) {
-            blue  = extract_value(hex[1]) | (extract_value(hex[2]) << 4);
-            green = extract_value(hex[3]) | (extract_value(hex[4]) << 4);
-            red   = extract_value(hex[5]) | (extract_value(hex[6]) << 4);
+            blue  = static_cast<std::uint8_t>(extract_value(hex[1]) | (extract_value(hex[2]) << 4));
+            green = static_cast<std::uint8_t>(extract_value(hex[3]) | (extract_value(hex[4]) << 4));
+            red   = static_cast<std::uint8_t>(extract_value(hex[5]) | (extract_value(hex[6]) << 4));
 
         } else {
             throw "Invalid color!";
@@ -71,8 +71,10 @@ public:
     }
     [[nodiscard]] constexpr value_t code() const { return m_r; }
     [[nodiscard]] constexpr color_id id() const {
-        color_id id = m_r | (m_g << (sizeof(value_t) * 8)) | (m_b << (sizeof(value_t) * 8 * 2))
-            | (static_cast<value_t>(m_type) << (sizeof(value_t) * 8 * 3));
+        color_id id = static_cast<color_id>(
+            m_r | (m_g << (sizeof(value_t) * 8)) | (m_b << (sizeof(value_t) * 8 * 2))
+            | (static_cast<value_t>(m_type) << (sizeof(value_t) * 8 * 3))
+        );
         return id;
     }
 
@@ -92,12 +94,12 @@ public:
             return { v, v, v };
         }
 
-        const value_t region = h / HUE_PART;
-        const value_t rem    = (h - (region * HUE_PART)) * 6;
+        const auto region = static_cast<value_t>(h / HUE_PART);
+        const auto rem    = static_cast<value_t>((h - (region * HUE_PART)) * 6);
 
-        const value_t p = (v * (255 - s)) >> 8;
-        const value_t q = (v * (255 - ((s * rem) >> 8))) >> 8;
-        const value_t t = (v * (255 - ((s * (255 - rem)) >> 8))) >> 8;
+        const auto p = static_cast<value_t>((v * (255 - s)) >> 8);
+        const auto q = static_cast<value_t>((v * (255 - ((s * rem) >> 8))) >> 8);
+        const auto t = static_cast<value_t>((v * (255 - ((s * (255 - rem)) >> 8))) >> 8);
 
         value_t r;
         value_t g;
@@ -154,11 +156,11 @@ private:
 
     static constexpr std::uint8_t extract_value(char val) {
         if ('a' <= val && val <= 'f') {
-            return 10 + val - 'a';
+            return static_cast<std::uint8_t>(10 + val - 'a');
         } else if ('A' <= val && val <= 'F') {
-            return 10 + val - 'A';
+            return static_cast<std::uint8_t>(10 + val - 'A');
         } else {
-            return val - '0';
+            return static_cast<std::uint8_t>(val - '0');
         }
     }
 

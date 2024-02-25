@@ -92,7 +92,7 @@ template <BoxDirection Direction> void Box<Direction>::update_layout() {
     const unit_t min_size    = (Direction == BoxDirection::HORIZONTAL) ? m_info.min_width : m_info.min_height;
     const unit_t target_size = (Direction == BoxDirection::HORIZONTAL) ? width() : height();
     const unit_t grow   = (Direction == BoxDirection::HORIZONTAL) ? m_info.grow_x_children : m_info.grow_y_children;
-    const unit_t shrink = (Direction == BoxDirection::HORIZONTAL) ? m_info.shrink_x_children : m_info.shrink_y_children;
+    const std::uint32_t shrink = (Direction == BoxDirection::HORIZONTAL) ? m_info.shrink_x_children : m_info.shrink_y_children;
 
     if (target_size >= min_size) {
         update_layout_grow(min_size, target_size, grow);
@@ -104,7 +104,7 @@ template <BoxDirection Direction> void Box<Direction>::update_layout() {
 }
 
 template <BoxDirection Direction>
-void Box<Direction>::update_layout_grow(unit_t min_size, unit_t target_size, unit_t grow) {
+void Box<Direction>::update_layout_grow(unit_t min_size, unit_t target_size, std::uint32_t grow) {
 
     const unit_t extra = target_size - min_size;
     if (grow == 0) {
@@ -135,7 +135,7 @@ void Box<Direction>::update_layout_grow(unit_t min_size, unit_t target_size, uni
 }
 
 template <BoxDirection Direction>
-void Box<Direction>::update_layout_shrink(unit_t min_size, unit_t target_size, std::uint8_t shrink) {
+void Box<Direction>::update_layout_shrink(unit_t min_size, unit_t target_size, std::uint32_t shrink) {
     const unit_t overflow = min_size - target_size;
 
     if (shrink == 0) {

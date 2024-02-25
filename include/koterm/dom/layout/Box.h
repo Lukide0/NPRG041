@@ -44,8 +44,8 @@ private:
     unit_t m_gap             = 0;
     unit_t m_shrink_min_size = 0;
 
-    void update_layout_grow(unit_t min_size, unit_t target_size, unit_t grow);
-    void update_layout_shrink(unit_t min_size, unit_t target_size, std::uint8_t shrink);
+    void update_layout_grow(unit_t min_size, unit_t target_size, std::uint32_t grow);
+    void update_layout_shrink(unit_t min_size, unit_t target_size, std::uint32_t shrink);
     void update_layout_shrink_force(unit_t target_size);
 };
 

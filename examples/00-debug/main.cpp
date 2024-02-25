@@ -5,7 +5,96 @@
 #include <iostream>
 #include <koterm/terminal/Parser.h>
 #include <koterm/terminal/terminal.h>
+#include <koterm/util/os.h>
+#include <string>
+#include <vector>
+
+std::vector<std::uint8_t> read_bytes();
+
+#ifdef OS_LINUX
 #include <unistd.h>
+
+std::vector<std::uint8_t> read_bytes() {
+    constexpr std::size_t BUFFER_SIZE = 256;
+
+    std::vector<std::uint8_t> buffer;
+    buffer.resize(BUFFER_SIZE);
+
+    long bytes = read(STDIN_FILENO, buffer.data(), BUFFER_SIZE);
+    if (bytes <= 0) {
+        return {};
+    }
+
+    buffer.resize(bytes);
+    return buffer;
+}
+
+#elif defined(OS_WINDOWS)
+
+#define WIN32_LEAN_AND_MEAN
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
+#include <Windows.h>
+#include <io.h>
+
+std::vector<std::uint8_t> read_bytes() {
+
+    HANDLE console_in        = GetStdHandle(STD_INPUT_HANDLE);
+    constexpr int TIMEOUT_MS = 250;
+
+    const auto wait = WaitForSingleObject(console_in, TIMEOUT_MS);
+    if (wait == WAIT_TIMEOUT) {
+        return {};
+    }
+
+    DWORD events_count = 0;
+    if (!GetNumberOfConsoleInputEvents(console_in, &events_count) || events_count <= 0) {
+        return {};
+    }
+
+    INPUT_RECORD record;
+    DWORD read_events = 0;
+    ReadConsoleInput(console_in, &record, 1, &read_events);
+
+    std::vector<std::uint8_t> bytes;
+
+    switch (record.EventType) {
+    case KEY_EVENT: {
+        const auto& key = record.Event.KeyEvent;
+
+        if (key.bKeyDown == false || key.uChar.AsciiChar == 0) {
+            break;
+        }
+
+        wchar_t key_data = key.uChar.UnicodeChar;
+        auto* data_raw   = reinterpret_cast<std::uint8_t*>(&key_data);
+
+        for (int i = 0; i < sizeof(wchar_t); i++) {
+            if (data_raw[i] == 0 && i != 0) {
+                break;
+            }
+
+            bytes.push_back(data_raw[i]);
+        }
+
+        break;
+    }
+    case WINDOW_BUFFER_SIZE_EVENT:
+        koterm::terminal::update_dimensions();
+        break;
+    default:
+        break;
+    }
+
+    return bytes;
+}
+
+#undef DELETE
+
+#endif
 
 constexpr int EXIT_OK   = 0;
 constexpr int EXIT_FAIL = 1;
@@ -33,33 +122,35 @@ int main() {
 
     terminal::Parser parser;
     while (true) {
-        std::uint8_t byte;
-        long size = read(STDIN_FILENO, &byte, sizeof(byte));
 
-        if (size == 0) {
+        auto bytes = read_bytes();
+
+        if (bytes.size() == 0) {
             continue;
         }
 
-        auto state = parser.parse(byte);
+        for (auto&& byte : bytes) {
+            auto state = parser.parse(byte);
 
-        switch (state) {
-        case terminal::Parser::ParserState::UNCOMPLETE:
-            break;
-        case terminal::Parser::ParserState::UNKNOWN:
-            parser.clear();
-            break;
-        case terminal::Parser::ParserState::EVENT:
-            print_event(parser);
-            parser.clear();
-            break;
-        case terminal::Parser::ParserState::CHARACTER:
-            std::cout << "CHARACTER: " << parser.text() << '\n';
-            parser.clear();
-            break;
-        case terminal::Parser::ParserState::SPECIAL:
-            print_special_character(parser);
-            parser.clear();
-            break;
+            switch (state) {
+            case terminal::Parser::ParserState::UNCOMPLETE:
+                break;
+            case terminal::Parser::ParserState::UNKNOWN:
+                parser.clear();
+                break;
+            case terminal::Parser::ParserState::EVENT:
+                print_event(parser);
+                parser.clear();
+                break;
+            case terminal::Parser::ParserState::CHARACTER:
+                std::cout << "CHARACTER: " << parser.text() << '\n';
+                parser.clear();
+                break;
+            case terminal::Parser::ParserState::SPECIAL:
+                print_special_character(parser);
+                parser.clear();
+                break;
+            }
         }
     }
 

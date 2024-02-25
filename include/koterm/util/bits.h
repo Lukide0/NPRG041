@@ -9,12 +9,12 @@
 
 namespace koterm::util {
 
-template <std::integral Storage> struct bits {
+template <std::unsigned_integral Storage> struct bits {
     using value_t                     = Storage;
     static constexpr std::size_t BITS = sizeof(Storage) * 8;
 
     static constexpr value_t BITS_NONE = 0;
-    static constexpr value_t BITS_ALL  = ~static_cast<value_t>(0);
+    static constexpr value_t BITS_ALL  = static_cast<value_t>(-1UL);
 
     bits() = delete;
 

@@ -1,5 +1,5 @@
 {
-    "version": 6,
+    "version": 5,
     "cmakeMinimumRequired": {
         "major": 3,
         "minor": 23,
@@ -37,7 +37,7 @@
             "name": "flags-msvc",
             "hidden": true,
             "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "/W4 /permissive- /Zc:inline /Zc:preprocessor /Zc:enumTypes /Zc:externConstexpr /Zc:lambda /EHsc /w14165 /w44242 /w44254 /w44263 /w34265 /w34287 /w44296 /w44365 /w44388 /w44464 /w14545 /w14546 /w14547 /w14549 /w14555 /w34619 /w14928 /w45038"
+                "CMAKE_CXX_FLAGS": "/W3 /permissive- /Zc:inline /Zc:preprocessor /Zc:enumTypes /Zc:externConstexpr /Zc:lambda /EHsc /w14165 /w44254 /w44263 /w34265 /w34287 /w44296 /w44388 /w44464 /w14545 /w14546 /w14547 /w14549 /w14555 /w34619 /w14928 /w45038"
             }
         },
         {

@@ -45,7 +45,7 @@ bool Input::handle_key(event::KeyCode key) {
 
     switch (key) {
     case event::KeyCode::ARROW_LEFT:
-        m_char_index = std::max(1UL, m_char_index) - 1;
+        m_char_index = std::max<std::size_t>(m_char_index, 1) - 1;
         break;
     case event::KeyCode::ARROW_RIGHT:
         m_char_index = std::min(m_char_index + 1, m_value.size());
@@ -57,7 +57,7 @@ bool Input::handle_key(event::KeyCode key) {
         if (m_char_index == 0) {
             break;
         }
-        m_char_index = std::max(1UL, m_char_index) - 1;
+        m_char_index = std::max<std::size_t>(m_char_index, 1) - 1;
         remove_at(m_char_index);
         break;
     case event::KeyCode::HOME:
@@ -92,7 +92,7 @@ void Input::remove_at(std::size_t index) {
 
 void Input::prepare_buffer() {
     using terminal::PixelStyle;
-    using std::string_view_literals::operator""sv;
+    using namespace std::string_view_literals;
 
     m_buffer.clear();
 
@@ -115,7 +115,7 @@ void Input::prepare_buffer() {
         offset = m_char_index - max_width;
     }
 
-    for (std::size_t i = 0; i <= max_width && i + offset <= m_value.size(); i++) {
+    for (unit_t i = 0; i <= max_width && i + offset <= m_value.size(); i++) {
 
         m_buffer.set_pixel_content(m_value[i + offset], i, 0);
         m_buffer.set_pixel_style(style, i, 0);
@@ -127,14 +127,14 @@ void Input::prepare_buffer() {
     }
 
     if (m_char_index == m_value.size()) {
-        m_buffer.set_pixel_content("█"sv, m_char_index - offset, 0);
+        m_buffer.set_pixel_content("█"sv, static_cast<unit_t>(m_char_index - offset), 0);
     } else {
-        m_buffer.set_pixel_style(PixelStyle::from<PixelStyle::INVERSE>(), m_char_index - offset, 0);
+        m_buffer.set_pixel_style(PixelStyle::from<PixelStyle::INVERSE>(), static_cast<unit_t>(m_char_index - offset), 0);
     }
 }
 
 void Input::calculate_requirements() {
-    m_info.min_width  = m_value.size() + 1;
+    m_info.min_width  = static_cast<unit_t>(m_value.size() + 1);
     m_info.min_height = 1;
 }
 

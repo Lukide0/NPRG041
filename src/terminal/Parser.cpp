@@ -441,18 +441,21 @@ Parser::ParserState Parser::parse_cursor(span_t content) {
     int row_value;
     int column_value;
 
-    auto [row_end, row_err]       = std::from_chars(row_ref.begin(), row_ref.end(), row_value);
-    auto [column_end, column_err] = std::from_chars(column_ref.begin(), column_ref.end(), column_value);
+    auto row_ref_end    = row_ref.data() + row_ref.size();
+    auto column_ref_end = column_ref.data() + column_ref.size();
 
-    if (row_err != std::errc() || row_end != row_ref.end() || column_err != std::errc()
-        || column_end != column_ref.end()) {
+    // https://github.com/cplusplus/papers/issues/744
+    auto [row_end, row_err]       = std::from_chars(row_ref.data(), row_ref_end, row_value);
+    auto [column_end, column_err] = std::from_chars(column_ref.data(), column_ref_end, column_value);
 
+    if (row_err != std::errc() || row_end != row_ref_end || column_err != std::errc()
+        || column_end != column_ref_end) {
         return ParserState::UNKNOWN;
     }
 
     m_type     = EventType::CURSOR;
-    m_cursor.x = column_value;
-    m_cursor.y = row_value;
+    m_cursor.x = static_cast<unit_t>(column_value);
+    m_cursor.y = static_cast<unit_t>(row_value);
 
     return ParserState::EVENT;
 }

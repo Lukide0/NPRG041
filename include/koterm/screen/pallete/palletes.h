@@ -8,7 +8,7 @@
 namespace koterm::screen::pallete {
 
 using namespace koterm::terminal::colors;
-using std::string_view_literals::operator""sv;
+using namespace std::string_view_literals;
 
 constexpr auto DEFAULT = Pallete(
     SYS_BLACK,

@@ -1,5 +1,3 @@
-include(${PROJECT_SOURCE_DIR}/cmake/doctest.cmake)
-
 function(create_test name)
 
   set(prefix ARG)

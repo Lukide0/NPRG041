@@ -73,7 +73,7 @@ public:
     void clear() { m_buffer.clear(); }
 
 private:
-    unit_t span_to_value(span_t span) { return util::utf8_codepoint(span) - 32; }
+    unit_t span_to_value(span_t span) { return static_cast<unit_t>(util::utf8_codepoint(span) - 32); }
 
     ParserState parse_value(span_t& content, span_t& out);
     ParserState parse_utf8(span_t content, std::size_t& out_bytes);

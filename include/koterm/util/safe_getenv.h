@@ -1,6 +1,13 @@
 #ifndef KOTERM_UTIL_SAFE_GETENV_H
 #define KOTERM_UTIL_SAFE_GETENV_H
 
+#include "koterm/util/os.h"
+
+#ifdef OS_WINDOWS
+// [C4996] 'getenv': This function of variable may be unsafe
+#pragma warning(disable : 4996)
+#endif
+
 #include <cstdlib>
 #include <string_view>
 
