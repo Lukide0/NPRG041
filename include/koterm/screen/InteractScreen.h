@@ -20,6 +20,8 @@ public:
 
     void start_event_listener();
 
+    void set_grow(bool grow = false) { m_can_grow = grow; }
+
     void handle_events();
     void run();
     void exit();
@@ -32,6 +34,7 @@ protected:
 private:
     std::atomic<bool> m_quit = true;
     std::thread m_parser_thread;
+    bool m_can_grow              = false;
     bool m_parser_thread_running = false;
     event::EventListener<event::Event> m_event_listener;
 };

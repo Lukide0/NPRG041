@@ -7,10 +7,12 @@
 #include "koterm/terminal/terminal.h"
 #include "koterm/unit.h"
 #include "koterm/util/os.h"
+#include <algorithm>
 #include <array>
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <memory>
 #include <span>
 #include <thread>
@@ -40,10 +42,7 @@ static InteractScreen* g_active_screen = nullptr;
 
 void event_emiter(event::EventListener<event::Event>* listener, std::atomic<bool>* quit);
 
-InteractScreen::~InteractScreen() {
-    exit();
-    m_parser_thread.join();
-}
+InteractScreen::~InteractScreen() { exit(); }
 
 void InteractScreen::run() {
     if (g_active_screen != nullptr) {
@@ -59,7 +58,14 @@ void InteractScreen::exit() {
         g_active_screen = nullptr;
     }
 
-    m_quit = true;
+    if (!m_quit) {
+        m_quit = true;
+
+        if (m_parser_thread_running) {
+            m_parser_thread.join();
+            m_parser_thread_running = false;
+        }
+    }
 }
 
 void stop_active() {
@@ -90,8 +96,25 @@ std::unique_ptr<InteractScreen> InteractScreen::create(unit_t width, unit_t heig
 }
 
 void InteractScreen::handle_events() {
+    using EventType = event::Event::EventType;
+
     event::Event event;
     while (m_event_listener.get_non_blocking(event)) {
+        if (event.type() == EventType::RESIZE) {
+
+            auto resize             = event.get<EventType::RESIZE>();
+            const auto& buffer_size = buffer().box();
+
+            if (!m_can_grow) {
+                resize.width  = std::min(resize.width, buffer_size.width());
+                resize.height = std::min(resize.height, buffer_size.height());
+            } else if (resize.width > buffer_size.width() || resize.height > buffer_size.height()) {
+                buffer().resize(resize.width, resize.height);
+            }
+
+            m_dom.handle_event(event::Event::create_resize(resize));
+            continue;
+        }
         m_dom.handle_event(event);
     }
 }
@@ -115,7 +138,7 @@ void InteractScreen::main_loop() {
         try_render();
     }
 
-    m_parser_thread.join();
+    exit();
 }
 
 inline void parse_bytes(
