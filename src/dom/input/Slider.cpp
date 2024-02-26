@@ -105,7 +105,7 @@ void Slider::prepare_buffer() {
     const unit_t width = (m_value - m_value_min) * (max_width - 2) / (m_value_max - m_value_min);
 
     for (unit_t i = 0; i <= width; i++) {
-        m_buffer.set_pixel_content('#', i + 1, 0);
+        m_buffer.set_pixel_content("█"sv, i + 1, 0);
         m_buffer.set_pixel_style(style, i + 1, 0);
         m_buffer.set_pixel_foreground(color.id(), i + 1, 0);
     }
