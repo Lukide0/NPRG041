@@ -6,4 +6,5 @@ target_sources(
           layout/DynamicLayout.cpp
           layout/Box.cpp
           input/Input.cpp
-          input/Button.cpp)
+          input/Button.cpp
+          input/Slider.cpp)

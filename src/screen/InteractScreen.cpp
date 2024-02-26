@@ -106,8 +106,8 @@ void InteractScreen::start_event_listener() {
 }
 
 void InteractScreen::main_loop() {
-    m_quit = false;
 
+    run();
     start_event_listener();
 
     while (!m_quit) {

@@ -75,7 +75,7 @@ bool Button::handle_key(event::KeyCode key) {
 }
 
 bool Button::handle_mouse_click(const event::MouseEvent& event) {
-    if (!m_buffer.box().contains(event.pos().x - 1, event.pos().y - 1)) {
+    if (!is_mouse_inside(event.pos())) {
         return false;
     }
 

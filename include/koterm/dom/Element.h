@@ -109,6 +109,10 @@ public:
 
     virtual bool has_child(element_ref element) const;
 
+    [[nodiscard]] bool is_mouse_inside(point_t point) const {
+        return m_buffer.box().contains(point.x - 1, point.y - 1);
+    }
+
 protected:
     virtual void prepare_buffer();
     virtual void remove_child(element_ref child);

@@ -21,8 +21,8 @@ public:
     using Alignment      = component::Alignment;
     using TextDecoration = component::TextDecoration;
 
-    static std::shared_ptr<Text> create(screen::BaseScreen& screen) {
-        return create(BufferSpan { screen.buffer(), screen.viewport() }, &screen.dom_manager());
+    static std::shared_ptr<Text> create(screen::BaseScreen* screen) {
+        return create(BufferSpan { screen->buffer(), screen->viewport() }, &screen->dom_manager());
     }
     static std::shared_ptr<Text> create(const BufferSpan& buffer, DomManager* manager);
 
