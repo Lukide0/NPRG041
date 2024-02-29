@@ -62,6 +62,7 @@ private:
     value_t m_value_max = MAX;
 
     signal_t m_onchange;
+    bool m_focused_by_mouse = false;
 };
 }
 

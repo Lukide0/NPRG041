@@ -47,6 +47,7 @@ bool Slider::handle_mouse_click(const event::MouseEvent& event) {
 
     if (event.btn_released<Btn::LEFT>()) {
         blur();
+        m_focused_by_mouse = false;
         return true;
     } else if (!is_mouse_inside(event.pos())) {
         return false;
@@ -54,8 +55,8 @@ bool Slider::handle_mouse_click(const event::MouseEvent& event) {
 
     if (event.btn_pressed<Btn::LEFT>()) {
         focus();
-        handle_mouse_move(event);
-        return true;
+        m_focused_by_mouse = true;
+        return handle_mouse_move(event);
     }
 
     return false;
@@ -63,7 +64,7 @@ bool Slider::handle_mouse_click(const event::MouseEvent& event) {
 
 bool Slider::handle_mouse_move(const event::MouseEvent& event) {
     auto pos = event.pos();
-    if (!is_mouse_inside(event.pos()) || !has_focus()) {
+    if (!is_mouse_inside(event.pos()) || !has_focus() || !m_focused_by_mouse) {
         return false;
     }
 
