@@ -9,9 +9,7 @@
 namespace koterm::dom::input {
 
 std::shared_ptr<Button> Button::create(const BufferSpan& buffer, DomManager* manager) {
-    auto btn = std::make_shared<Button>(buffer, manager);
-    btn->set_focusable(true);
-    return btn;
+    return std::make_shared<Button>(buffer, manager, true);
 }
 
 void Button::prepare_buffer() {

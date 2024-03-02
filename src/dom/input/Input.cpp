@@ -13,10 +13,7 @@
 namespace koterm::dom::input {
 
 std::shared_ptr<Input> Input::create(const BufferSpan& buffer, DomManager* manager) {
-    auto input = std::make_shared<Input>(buffer, manager);
-    input->set_focusable(true);
-
-    return input;
+    return std::make_shared<Input>(buffer, manager, true);
 }
 
 bool Input::handle_input(const event::CharacterEvent& event) {
@@ -65,9 +62,6 @@ bool Input::handle_key(event::KeyCode key) {
         break;
     case event::KeyCode::END:
         m_char_index = m_value.size();
-        break;
-    case event::KeyCode::F10:
-        blur();
         break;
     default:
         return false;
@@ -129,7 +123,9 @@ void Input::prepare_buffer() {
     if (m_char_index == m_value.size()) {
         m_buffer.set_pixel_content("█"sv, static_cast<unit_t>(m_char_index - offset), 0);
     } else {
-        m_buffer.set_pixel_style(PixelStyle::from<PixelStyle::INVERSE>(), static_cast<unit_t>(m_char_index - offset), 0);
+        m_buffer.set_pixel_style(
+            PixelStyle::from<PixelStyle::INVERSE>(), static_cast<unit_t>(m_char_index - offset), 0
+        );
     }
 }
 

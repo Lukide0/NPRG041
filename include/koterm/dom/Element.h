@@ -24,7 +24,8 @@ class DomManager;
 class Element;
 
 using element_t           = std::shared_ptr<Element>;
-using element_ref         = Element* /*std::weak_ptr<Element>*/;
+using element_ref         = Element*;
+using element_weak_ref    = std::weak_ptr<Element>;
 using element_const_ref   = const Element*;
 using element_container_t = std::vector<element_t>;
 using element_map_t       = std::set<element_t>;
@@ -58,8 +59,8 @@ public:
     using BufferSpan = terminal::BufferSpan;
     using Ascii      = util::ascii::codes;
 
-    Element(const BufferSpan& buffer, DomManager* manager);
-    Element(screen::BaseScreen* screen);
+    Element(const BufferSpan& buffer, DomManager* manager, bool focusable = false);
+    Element(screen::BaseScreen* screen, bool focusable = false);
     virtual ~Element();
 
     void show();
@@ -119,8 +120,6 @@ protected:
 
     void request_render();
 
-    void set_focusable(bool focusable = false) { m_focusable = focusable; }
-
     [[nodiscard]] bool need_update() const { return m_need_update; }
     [[nodiscard]] const screen::pallete::Pallete& get_pallete() const;
 
@@ -139,6 +138,8 @@ private:
     bool m_focusable     = false;
     bool m_need_update   = false;
     DomManager* m_manager;
+
+    friend class DomManager;
 };
 
 }

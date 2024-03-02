@@ -11,10 +11,7 @@
 namespace koterm::dom::input {
 
 std::shared_ptr<Slider> Slider::create(const BufferSpan& buffer, DomManager* manager) {
-    auto input = std::make_shared<Slider>(buffer, manager);
-    input->set_focusable(true);
-
-    return input;
+    return std::make_shared<Slider>(buffer, manager, true);
 }
 
 bool Slider::handle_key(event::KeyCode key) {
@@ -31,9 +28,6 @@ bool Slider::handle_key(event::KeyCode key) {
         m_value = std::min(m_value_max - 1, m_value) + 1;
         m_onchange.emit(m_value);
         break;
-    case event::KeyCode::F10:
-        blur();
-        break;
     default:
         return false;
     }
@@ -45,7 +39,7 @@ bool Slider::handle_key(event::KeyCode key) {
 bool Slider::handle_mouse_click(const event::MouseEvent& event) {
     using Btn = event::MouseEvent::Btn;
 
-    if (event.btn_released<Btn::LEFT>()) {
+    if (has_focus() && event.btn_released<Btn::LEFT>()) {
         blur();
         m_focused_by_mouse = false;
         return true;

@@ -15,18 +15,29 @@
 namespace koterm::dom {
 
 // NOLINTNEXTLINE(modernize-pass-by-value)
-Element::Element(const BufferSpan& buffer, DomManager* manager)
+Element::Element(const BufferSpan& buffer, DomManager* manager, bool focusable)
     : m_buffer(buffer)
-    , m_manager(manager) { }
+    , m_focusable(focusable)
+    , m_manager(manager) {
+    if (focusable) {
+        m_manager->register_focusable(this);
+    }
+}
 
-Element::Element(screen::BaseScreen* screen)
+Element::Element(screen::BaseScreen* screen, bool focusable)
     : m_buffer(screen->buffer())
-    , m_manager(&screen->dom_manager()) { }
+    , m_focusable(focusable)
+    , m_manager(&screen->dom_manager()) {
+    if (focusable) {
+        m_manager->register_focusable(this);
+    }
+}
 
 Element::~Element() {
-    if (m_manager != nullptr && m_focused) {
-        m_manager->lose_focus(this);
+    if (m_manager != nullptr && m_focusable) {
+        m_manager->remove_focusable(this);
     }
+
     if (m_parent != nullptr) {
         m_parent->remove_child(this);
     }
@@ -47,26 +58,31 @@ void Element::hide() {
         return;
     }
 
+    if (m_focused) {
+        m_manager->lose_focus(this);
+        m_focused = false;
+    }
+
     m_hidden = true;
     request_update();
 }
 
 void Element::focus() {
-    if (m_focused || !m_focusable) {
+    if (m_focused || !m_focusable || m_hidden) {
         return;
     }
 
-    m_manager->steal_focus(this);
-    m_focused = true;
+    m_focused = m_manager->steal_focus(this);
     request_render();
 }
 
 void Element::blur() {
-    if (!m_focused) {
+    if (!m_focused || !m_focusable) {
         return;
     }
-    m_manager->lose_focus(this);
+
     m_focused = false;
+    m_manager->lose_focus(this);
     request_render();
 }
 
