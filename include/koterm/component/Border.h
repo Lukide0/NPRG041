@@ -8,6 +8,8 @@ namespace koterm::component {
 
 class Border {
 public:
+    using color_id = terminal::Color::color_id;
+
     enum class Style {
         NONE   = 0,
         THIN   = 1,
@@ -15,7 +17,7 @@ public:
         DOUBLE = 3,
     };
 
-    Border(Style style = Style::NONE, terminal::Color::color_id color = terminal::colors::SYS_DEFAULT.id())
+    Border(Style style = Style::NONE, color_id color = terminal::colors::SYS_DEFAULT.id())
         : m_style(style)
         , m_color(color) { }
 
@@ -23,12 +25,14 @@ public:
     [[nodiscard]] Style style() const { return m_style; }
 
     [[nodiscard]] bool has() const { return m_style != Style::NONE; }
+    void modify_color(color_id color) { m_color = color; }
+    [[nodiscard]] color_id color() const { return m_color; }
 
     void render(terminal::BufferSpan& buffer);
 
 private:
     Style m_style;
-    terminal::Color::color_id m_color;
+    color_id m_color;
 };
 
 }

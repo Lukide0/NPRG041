@@ -71,7 +71,7 @@ public:
     }
     [[nodiscard]] constexpr value_t code() const { return m_r; }
     [[nodiscard]] constexpr color_id id() const {
-        color_id id = static_cast<color_id>(
+        auto id = static_cast<color_id>(
             m_r | (m_g << (sizeof(value_t) * 8)) | (m_b << (sizeof(value_t) * 8 * 2))
             | (static_cast<value_t>(m_type) << (sizeof(value_t) * 8 * 3))
         );
@@ -146,6 +146,7 @@ public:
     static consteval Color from_hex(std::string_view hex) { return { hex }; }
 
     [[nodiscard]] constexpr Type type() const { return m_type; }
+    constexpr operator color_id() const { return id(); }
 
 private:
     constexpr Color(value_t red, value_t green, value_t blue, Type type)
