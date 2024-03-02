@@ -35,6 +35,8 @@ using Features = util::bit_flags<FeatureFlags>;
  */
 bool init(Features features);
 
+void cleanup();
+
 bool register_exit_handle(std::function<void()> handle);
 
 /**

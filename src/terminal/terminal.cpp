@@ -235,6 +235,8 @@ bool init(Features features = FeatureFlags::NONE) {
     return true;
 }
 
+void cleanup() { rollback_terminal(); }
+
 ColorSupport color_support() { return (g_terminfo != nullptr) ? g_terminfo->color_support : DEFAULT_COLOR_SUPPORT; }
 Dimensions dimensions() { return (g_terminfo != nullptr) ? g_terminfo->dimensions : DEFAULT_DIMS; }
 Features features() { return (g_terminfo != nullptr) ? g_terminfo->features : Features {}; }
