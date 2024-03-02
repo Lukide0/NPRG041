@@ -3,6 +3,7 @@
 
 #include "koterm/dom/Element.h"
 #include "koterm/event/Event.h"
+#include <cstddef>
 
 namespace koterm::dom::layout {
 
@@ -20,7 +21,8 @@ public:
 protected:
     using Element::Element;
 
-    element_map_t m_elements;
+    element_container_t m_elements;
+    std::size_t m_focus = 0;
 
 private:
     void prepare_buffer() override;

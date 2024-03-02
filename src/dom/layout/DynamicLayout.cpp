@@ -9,7 +9,7 @@ namespace koterm::dom::layout {
 
 void DynamicLayout::add_element(element_t element) {
     element->set_parent(this);
-    m_elements.insert(element);
+    m_elements.push_back(element);
 
     request_update();
 }
@@ -19,7 +19,7 @@ void DynamicLayout::add_elements(const element_container_t& elements) {
         element->set_parent(this);
     }
 
-    m_elements.insert(elements.begin(), elements.end());
+    m_elements.insert(m_elements.end(), elements.begin(), elements.end());
     request_update();
 }
 
@@ -35,6 +35,7 @@ void DynamicLayout::remove_element(element_ref element) {
 }
 
 bool DynamicLayout::handle_event(const event::Event& event) {
+
     for (auto&& element : m_elements) {
         if (element->handle_event(event)) {
             return true;
