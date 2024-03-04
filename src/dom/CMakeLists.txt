@@ -7,4 +7,5 @@ target_sources(
           layout/Box.cpp
           input/Input.cpp
           input/Button.cpp
-          input/Slider.cpp)
+          input/Slider.cpp
+          input/Checkbox.cpp)
