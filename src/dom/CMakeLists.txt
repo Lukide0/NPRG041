@@ -8,4 +8,5 @@ target_sources(
           input/Input.cpp
           input/Button.cpp
           input/Slider.cpp
-          input/Checkbox.cpp)
+          input/Checkbox.cpp
+          drawing/Canvas.cpp)
