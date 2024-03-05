@@ -81,6 +81,11 @@ bool DomManager::handle_special_key(event::KeyCode key) {
         request_render();
         return true;
     case LOOSE_FOCUS_KEY:
+        if (m_focused_index < m_focusable.size()) {
+            get_focused()->m_focused = false;
+        }
+        request_render();
+        return true;
     case FOCUS_PREV_KEY:
         focus_prev();
         request_render();
