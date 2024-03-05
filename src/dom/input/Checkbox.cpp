@@ -61,14 +61,10 @@ bool Checkbox::handle_key(event::KeyCode key) {
 }
 
 bool Checkbox::handle_mouse_click(const event::MouseEvent& event) {
-    if (!is_mouse_inside(event.pos())) {
-        return false;
-    }
-
-    if (event.btn_pressed<event::MouseEvent::Btn::LEFT>()) {
+    if (is_mouse_inside(event.pos()) && event.btn_pressed<event::MouseEvent::Btn::LEFT>()) {
         focus();
         return true;
-    } else if (event.btn_released<event::MouseEvent::Btn::LEFT>()) {
+    } else if (has_focus() && event.btn_released<event::MouseEvent::Btn::LEFT>()) {
         m_checked = !m_checked;
         m_onchange.emit(m_checked);
         return true;
