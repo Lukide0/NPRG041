@@ -14,6 +14,12 @@ namespace koterm::component {
 
 class Text {
 public:
+    Text() = default;
+    Text(std::string&& text)
+        : m_text(std::move(text)) { }
+    Text(const std::string& text)
+        : m_text(text) { }
+
     [[nodiscard]] Alignment alignment() const { return m_align; }
     Alignment& modify_alignment() { return m_align; }
 
@@ -23,6 +29,7 @@ public:
     [[nodiscard]] std::size_t size() const { return m_text.size(); }
 
     [[nodiscard]] TextDecoration decoration() const { return m_decoration; }
+    void set_decoration(TextDecoration decoration) { m_decoration = decoration; }
     TextDecoration& modify_decoration() { return m_decoration; }
 
     void render(

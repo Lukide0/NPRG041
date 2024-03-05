@@ -13,7 +13,7 @@ void Text::render(terminal::BufferSpan& buffer, terminal::Color foreground, term
     const auto width  = buffer.width();
     const auto height = buffer.height();
 
-    const unit_t text_size = static_cast<unit_t>(m_text.size());
+    const auto text_size = static_cast<unit_t>(m_text.size());
 
     if (text_size == 0) {
         return;
