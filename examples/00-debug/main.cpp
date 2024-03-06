@@ -1,12 +1,12 @@
 #include "koterm/event/KeyCodes.h"
 #include "koterm/unit.h"
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <iostream>
 #include <koterm/terminal/Parser.h>
 #include <koterm/terminal/terminal.h>
 #include <koterm/util/os.h>
-#include <string>
 #include <vector>
 
 std::vector<std::uint8_t> read_bytes();
@@ -125,7 +125,7 @@ int main() {
 
         auto bytes = read_bytes();
 
-        if (bytes.size() == 0) {
+        if (bytes.empty()) {
             continue;
         }
 
