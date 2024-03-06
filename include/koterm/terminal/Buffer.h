@@ -6,6 +6,7 @@
 #include "koterm/exceptions.h"
 #include "koterm/terminal/Color.h"
 #include "koterm/terminal/Tile.h"
+#include "koterm/terminal/colors.h"
 #include "koterm/unit.h"
 #include "koterm/util/debug.h"
 #include <cassert>
@@ -136,6 +137,20 @@ public:
     void set_pixel_content(TileEncoding tile, unit_t x, unit_t y);
 
     /**
+     * @brief Sets the background color of the buffer.
+     *
+     * @param color The color to set as the background.
+     */
+    void set_background(Color color) { m_bg = color.id(); }
+
+    /**
+     * @brief Sets the foreground color of the buffer.
+     *
+     * @param color The color to set as the foreground.
+     */
+    void set_foreground(Color color) { m_fg = color.id(); }
+
+    /**
      * @brief Combines a tile with the content of a pixel in the buffer.
      *
      * @param tile The tile encoding to combine.
@@ -158,7 +173,18 @@ public:
      */
     [[nodiscard]] unit_t height() const { return m_height; }
 
+    /**
+     * @brief Retrieves the bounding box of the buffer, representing its dimensions.
+     *
+     * @return The bounding box of the buffer.
+     */
     [[nodiscard]] const BoundingBox& box() const { return m_box; }
+
+    /**
+     * @brief Retrieves the bounding box of the buffer's render area, considering any viewport or clipping.
+     *
+     * @return The bounding box of the buffer's render area.
+     */
     [[nodiscard]] const BoundingBox& render_box() const { return m_render_box; }
 
     /**
@@ -193,6 +219,8 @@ private:
     unit_t m_height;
     BoundingBox m_box;
     BoundingBox m_render_box;
+    Color::color_id m_fg;
+    Color::color_id m_bg;
 
     std::vector<PixelStyle> m_pixels_style;
     std::vector<PixelContent> m_pixels_content;

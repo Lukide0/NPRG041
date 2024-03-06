@@ -19,6 +19,14 @@
 
 namespace koterm::dom::input {
 
+/**
+ * @brief Represents a group of radio buttons for selecting a single option from a set of choices.
+ *
+ * This class extends the functionality of the Element class to provide a group of radio buttons,
+ * where only one option can be selected at a time.
+ *
+ * @tparam T The type of value associated with each option.
+ */
 template <typename T> class Radiobox : public Element {
 public:
     using signal_t = component::Signal<T>;
@@ -28,41 +36,119 @@ public:
         T value;
     };
 
+    /**
+     * @brief Creates a new Radiobox instance with the specified options.
+     *
+     * @param buffer The buffer to render the radiobox onto.
+     * @param manager The DOM manager.
+     * @param options The vector of options for the radiobox.
+     * @return A shared pointer to the newly created Radiobox instance.
+     */
     static std::shared_ptr<Radiobox<T>>
     create(const BufferSpan& buffer, DomManager* manager, std::vector<Option>&& options) {
-        auto el         = std::make_shared<Radiobox<T>>(buffer, manager, true);
+        auto el         = std::make_shared<Radiobox<T>>(buffer, manager, true, false, true);
         el->m_options   = std::move(options);
         el->m_max_width = max_width(options);
         return el;
     }
+
+    /**
+     * @brief Creates a new Radiobox instance with the specified options.
+     *
+     * @param buffer The buffer to render the radiobox onto.
+     * @param manager The DOM manager.
+     * @param options The vector of options for the radiobox.
+     * @return A shared pointer to the newly created Radiobox instance.
+     */
     static std::shared_ptr<Radiobox<T>>
     create(const BufferSpan& buffer, DomManager* manager, const std::vector<Option>& options) {
-        auto el         = std::make_shared<Radiobox<T>>(buffer, manager, true);
+        auto el         = std::make_shared<Radiobox<T>>(buffer, manager, true, false, true);
         el->m_options   = options;
         el->m_max_width = max_width(options);
         return el;
     }
 
+    /**
+     * @brief Creates a new Radiobox instance with the specified options.
+     *
+     * @param screen The BaseScreen to create the radiobox on.
+     * @param options The vector of options for the radiobox.
+     * @return A shared pointer to the newly created Radiobox instance.
+     */
     static std::shared_ptr<Radiobox<T>> create(screen::BaseScreen* screen, std::vector<Option>&& options) {
-        return create(BufferSpan { screen->buffer() }, &screen->dom_manager(), std::forward(options));
+        return create(BufferSpan { screen->buffer() }, &screen->dom_manager(), std::move(options));
     }
 
+    /**
+     * @brief Creates a new Radiobox instance with the specified options.
+     *
+     * @param screen The BaseScreen to create the radiobox on.
+     * @param options The vector of options for the radiobox.
+     * @return A shared pointer to the newly created Radiobox instance.
+     */
     static std::shared_ptr<Radiobox<T>> create(screen::BaseScreen* screen, const std::vector<Option>& options) {
         return create(BufferSpan { screen->buffer() }, &screen->dom_manager(), options);
     }
 
+    /**
+     * @brief Handles key events for the radiobox.
+     *
+     * @param key The key event that occurred.
+     * @return True if the key event was handled, false otherwise.
+     */
     bool handle_key(event::KeyCode key) override;
+
+    /**
+     * @brief Handles mouse click events for the radiobox.
+     *
+     * @param event The mouse click event that occurred.
+     * @return True if the mouse click event was handled, false otherwise.
+     */
     bool handle_mouse_click(const event::MouseEvent& event) override;
 
+    /**
+     * @brief Prepares the radiobox for rendering.
+     *
+     * This function prepares the radiobox for rendering by updating its buffer contents based on
+     * its current state and properties.
+     */
     void prepare_buffer() override;
     void calculate_requirements() override;
 
+    /**
+     * @brief Accessor for the onChange signal of the radiobox.
+     *
+     * This signal is triggered when the selection in the radiobox changes.
+     * @return Reference to the onChange signal of the radiobox.
+     */
     signal_t& on_change() { return m_onchange; }
 
+    /**
+     * @brief Accessor for the options of the radiobox.
+     *
+     * @return Const reference to the vector of options in the radiobox.
+     */
     const std::vector<Option>& options() const { return m_options; }
 
+    /**
+     * @brief Checks if the radiobox has a selected value.
+     *
+     * @return True if the radiobox has a selected value, false otherwise.
+     */
     [[nodiscard]] bool has_value() const { return !m_options.empty(); }
+
+    /**
+     * @brief Retrieves the currently selected value of the radiobox.
+     *
+     * @return Const reference to the currently selected value of the radiobox.
+     */
     [[nodiscard]] const T& value() const { return m_options[m_selected].value; }
+
+    /**
+     * @brief Selects the option at the specified index.
+     *
+     * @param index The index of the option to select.
+     */
     void select(std::size_t index = 0) {
         std::size_t tmp = std::min<std::size_t>(index, std::max<std::size_t>(m_options.size(), 1) - 1);
         if (tmp != m_selected) {
@@ -73,6 +159,11 @@ public:
         }
     }
 
+    /**
+     * @brief Highlights the option at the specified index.
+     *
+     * @param index The index of the option to highlight.
+     */
     void highlight(std::size_t index = 0) {
         std::size_t tmp = std::min<std::size_t>(index, std::max<std::size_t>(m_options.size(), 1) - 1);
         if (tmp != m_highlighted) {
@@ -84,6 +175,12 @@ public:
 private:
     using Element::Element;
 
+    /**
+     * @brief Calculates the maximum width among the labels of the radiobox options.
+     *
+     * @param options The vector of options for the radiobox.
+     * @return The maximum width among the option labels.
+     */
     static std::size_t max_width(const std::vector<Option>& options) {
         return std::max_element(
                    options.begin(),

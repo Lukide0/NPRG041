@@ -13,7 +13,7 @@
 namespace koterm::dom::input {
 
 std::shared_ptr<Input> Input::create(const BufferSpan& buffer, DomManager* manager) {
-    return std::make_shared<Input>(buffer, manager, true);
+    return std::make_shared<Input>(buffer, manager, true, true, true);
 }
 
 bool Input::handle_input(const event::CharacterEvent& event) {

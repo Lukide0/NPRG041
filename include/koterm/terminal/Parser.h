@@ -18,7 +18,6 @@ public:
     using span_t = std::span<std::uint8_t>;
 
     enum class ParserState { UNCOMPLETE, UNKNOWN, EVENT, CHARACTER, SPECIAL };
-
     enum class EventType { NONE, MOUSE, KEY, CURSOR };
 
     struct MouseEvent {
@@ -58,21 +57,70 @@ public:
     Parser(Parser&&)      = delete;
     Parser(const Parser&) = delete;
 
+    /**
+     * @brief Parses an input byte.
+     *
+     * @param byte The input byte to parse.
+     * @return The state of the parser after parsing the byte.
+     */
     ParserState parse(std::uint8_t byte);
 
+    /**
+     * @brief Gets the type of event parsed by the parser.
+     *
+     * @return The type of event.
+     */
     [[nodiscard]] EventType event_type() const { return m_type; }
+
+    /**
+     * @brief Gets the mouse event data parsed by the parser.
+     *
+     * @return The mouse event data.
+     */
     [[nodiscard]] const MouseEvent& mouse() const { return m_mouse; }
+
+    /**
+     * @brief Gets the key event data parsed by the parser.
+     *
+     * @return The key event data.
+     */
     [[nodiscard]] event::KeyCode key() const { return m_key; }
+
+    /**
+     * @brief Gets the ASCII code parsed by the parser.
+     *
+     * @return The ASCII code.
+     */
     [[nodiscard]] util::ascii::codes code() const { return static_cast<util::ascii::codes>(m_buffer[0]); }
+
+    /**
+     * @brief Gets the cursor position parsed by the parser.
+     *
+     * @return The cursor position.
+     */
     [[nodiscard]] point_t cursor() const { return m_cursor; }
 
+    /**
+     * @brief Gets the text parsed by the parser.
+     *
+     * @return The parsed text.
+     */
     [[nodiscard]] std::string_view text() const {
         return { reinterpret_cast<const char*>(m_buffer.data()), m_buffer.size() };
     }
 
+    /**
+     * @brief Clears the buffer.
+     */
     void clear() { m_buffer.clear(); }
 
 private:
+    /**
+     * @brief Converts a byte span(utf-8) to a value.
+     *
+     * @param span The byte span to convert.
+     * @return The converted value.
+     */
     unit_t span_to_value(span_t span) { return static_cast<unit_t>(util::utf8_codepoint(span) - 32); }
 
     ParserState parse_value(span_t& content, span_t& out);

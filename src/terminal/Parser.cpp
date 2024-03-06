@@ -441,8 +441,8 @@ Parser::ParserState Parser::parse_cursor(span_t content) {
     int row_value;
     int column_value;
 
-    auto row_ref_end    = row_ref.data() + row_ref.size();
-    auto column_ref_end = column_ref.data() + column_ref.size();
+    const auto* row_ref_end    = row_ref.data() + row_ref.size();
+    const auto* column_ref_end = column_ref.data() + column_ref.size();
 
     // https://github.com/cplusplus/papers/issues/744
     auto [row_end, row_err]       = std::from_chars(row_ref.data(), row_ref_end, row_value);

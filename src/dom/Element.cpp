@@ -15,18 +15,22 @@
 namespace koterm::dom {
 
 // NOLINTNEXTLINE(modernize-pass-by-value)
-Element::Element(const BufferSpan& buffer, DomManager* manager, bool focusable)
+Element::Element(const BufferSpan& buffer, DomManager* manager, bool focusable, bool shrinkable, bool growable)
     : m_buffer(buffer)
     , m_focusable(focusable)
+    , m_shrinkable(shrinkable)
+    , m_growable(growable)
     , m_manager(manager) {
     if (focusable) {
         m_manager->register_focusable(this);
     }
 }
 
-Element::Element(screen::BaseScreen* screen, bool focusable)
+Element::Element(screen::BaseScreen* screen, bool focusable, bool shrinkable, bool growable)
     : m_buffer(screen->buffer())
     , m_focusable(focusable)
+    , m_shrinkable(shrinkable)
+    , m_growable(growable)
     , m_manager(&screen->dom_manager()) {
     if (focusable) {
         m_manager->register_focusable(this);

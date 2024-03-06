@@ -12,14 +12,14 @@ template class Box<BoxDirection::HORIZONTAL>;
 template class Box<BoxDirection::VERTICAL>;
 
 template <BoxDirection Direction>
-Box<Direction>::box_t Box<Direction>::create(const Element::BufferSpan& buffer, DomManager* manager) {
-    return std::make_shared<Box<Direction>>(buffer, manager);
+std::shared_ptr<Box<Direction>> Box<Direction>::create(const Element::BufferSpan& buffer, DomManager* manager) {
+    return std::make_shared<Box<Direction>>(buffer, manager, false, true, true);
 }
 
 template <BoxDirection Direction>
-Box<Direction>::box_t
+std::shared_ptr<Box<Direction>>
 Box<Direction>::create(const Element::BufferSpan& buffer, DomManager* manager, const element_container_t& elements) {
-    auto box = std::make_shared<Box<Direction>>(buffer, manager);
+    auto box = std::make_shared<Box<Direction>>(buffer, manager, false, true, true);
     box->add_elements(elements);
     return box;
 }
@@ -91,8 +91,9 @@ template <BoxDirection Direction> void Box<Direction>::update_layout() {
 
     const unit_t min_size    = (Direction == BoxDirection::HORIZONTAL) ? m_info.min_width : m_info.min_height;
     const unit_t target_size = (Direction == BoxDirection::HORIZONTAL) ? width() : height();
-    const unit_t grow   = (Direction == BoxDirection::HORIZONTAL) ? m_info.grow_x_children : m_info.grow_y_children;
-    const std::uint32_t shrink = (Direction == BoxDirection::HORIZONTAL) ? m_info.shrink_x_children : m_info.shrink_y_children;
+    const unit_t grow = (Direction == BoxDirection::HORIZONTAL) ? m_info.grow_x_children : m_info.grow_y_children;
+    const std::uint32_t shrink
+        = (Direction == BoxDirection::HORIZONTAL) ? m_info.shrink_x_children : m_info.shrink_y_children;
 
     if (target_size >= min_size) {
         update_layout_grow(min_size, target_size, grow);

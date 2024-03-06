@@ -12,10 +12,16 @@
 
 namespace koterm::event {
 
+/**
+ * @brief Represents a character event containing a string character.
+ */
 struct CharacterEvent {
     std::string character;
 };
 
+/**
+ * @brief Represents a mouse event.
+ */
 struct MouseEvent {
     enum class Btn {
         NONE,
@@ -25,25 +31,77 @@ struct MouseEvent {
     };
 
     MouseEvent() = default;
+
+    /**
+     * @brief Constructs a MouseEvent with provided data and button state.
+     *
+     * @param data The mouse event data.
+     * @param btn The mouse button state.
+     */
     MouseEvent(const terminal::Parser::MouseEvent& data, Btn btn = Btn::NONE)
         : m_data(data)
         , m_btn(btn) { }
 
+    /**
+     * @brief Checks if the specified button is pressed.
+     *
+     * @tparam BTN The button state to check.
+     * @return True if the specified button is pressed, otherwise false.
+     */
     template <Btn BTN> [[nodiscard]] bool btn_pressed() const {
         return m_btn == BTN && m_data.is_button() && m_data.btn_press();
     }
 
+    /**
+     * @brief Checks if the specified button is released.
+     *
+     * @tparam BTN The button state to check.
+     * @return True if the specified button is released, otherwise false.
+     */
     template <Btn BTN> [[nodiscard]] bool btn_released() const {
         return m_btn == BTN && m_data.is_button() && m_data.btn_release();
     }
 
+    /**
+     * @brief Checks if the mouse is scrolled down.
+     *
+     * @return True if the mouse is scrolled down, otherwise false.
+     */
     [[nodiscard]] bool scroll_down() const { return m_data.is_scroll() && m_data.scroll_forward(); }
+
+    /**
+     * @brief Checks if the mouse is scrolled up.
+     *
+     * @return True if the mouse is scrolled up, otherwise false.
+     */
     [[nodiscard]] bool scroll_up() const { return m_data.is_scroll() && m_data.scroll_back(); }
 
+    /**
+     * @brief Checks if the control key is pressed.
+     *
+     * @return True if the control key is pressed, otherwise false.
+     */
     [[nodiscard]] bool control() const { return m_data.control(); }
+
+    /**
+     * @brief Checks if the shift key is pressed.
+     *
+     * @return True if the shift key is pressed, otherwise false.
+     */
     [[nodiscard]] bool shift() const { return m_data.shift(); }
+
+    /**
+     * @brief Checks if the meta key is pressed.
+     *
+     * @return True if the meta key is pressed, otherwise false.
+     */
     [[nodiscard]] bool meta() const { return m_data.meta(); }
 
+    /**
+     * @brief Gets the position of the mouse.
+     *
+     * @return The position of the mouse.
+     */
     [[nodiscard]] point_t pos() const { return m_data.mouse; }
 
 private:
@@ -51,6 +109,9 @@ private:
     Btn m_btn;
 };
 
+/**
+ * @brief Represents an event containing various types of data such as resize, mouse movement, key press, etc.
+ */
 class Event {
 public:
     enum class EventType {
@@ -67,8 +128,19 @@ public:
 
     Event() = default;
 
+    /**
+     * @brief Gets the type of the event.
+     *
+     * @return The type of the event.
+     */
     [[nodiscard]] EventType type() const { return m_type; }
 
+    /**
+     * @brief Gets the data associated with the specified event type.
+     *
+     * @tparam TYPE The type of the event data to retrieve.
+     * @return The data associated with the specified event type.
+     */
     template <EventType TYPE> [[nodiscard]] const auto& get() const {
 
         if constexpr (TYPE == EventType::RESIZE) {

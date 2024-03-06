@@ -1,6 +1,5 @@
 #include "koterm/dom/drawing/Canvas.h"
 #include "koterm/BoundingBox.h"
-#include "koterm/component/Border.h"
 #include "koterm/dom/DomManager.h"
 #include "koterm/terminal/Buffer.h"
 #include "koterm/unit.h"
@@ -9,7 +8,7 @@
 namespace koterm::dom::drawing {
 
 std::shared_ptr<Canvas> Canvas::create(const BufferSpan& buffer, DomManager* manager) {
-    return std::make_shared<Canvas>(buffer, manager, false);
+    return std::make_shared<Canvas>(buffer, manager, false, true, true);
 }
 
 Canvas& Canvas::fill_rect(BoundingBox box, color_t color) {
@@ -24,6 +23,7 @@ Canvas& Canvas::fill_rect(BoundingBox box, color_t color) {
 
     return *this;
 }
+
 Canvas& Canvas::stroke_rect(BoundingBox box, color_t color) {
 
     box = BoundingBox::overlap(box, m_buffer.box());
@@ -45,6 +45,7 @@ Canvas& Canvas::stroke_rect(BoundingBox box, color_t color) {
 
     return *this;
 }
+
 Canvas& Canvas::line(point_t start, point_t end, color_t color) {
 
     int dx;
@@ -68,8 +69,7 @@ Canvas& Canvas::line(point_t start, point_t end, color_t color) {
         step_y = 1;
     }
 
-    int err = dx + dy;
-
+    int err       = dx + dy;
     point_t begin = start;
 
     BoundingBox box = m_buffer.box();

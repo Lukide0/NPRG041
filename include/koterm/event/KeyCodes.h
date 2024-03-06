@@ -4,6 +4,9 @@
 #include <cstdint>
 namespace koterm::event {
 
+/**
+ * @brief Enumeration for keyboard key codes.
+ */
 enum class KeyCode : std::uint8_t {
     ARROW_UP,
     ARROW_DOWN,

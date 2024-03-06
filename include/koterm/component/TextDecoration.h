@@ -8,6 +8,12 @@ class TextDecoration {
 public:
     using Decoration = terminal::PixelStyle::StyleFlags;
 
+    /**
+     * @brief Sets a text decoration style.
+     *
+     * @param decoration The decoration style to set.
+     * @return Reference to the current TextDecoration object.
+     */
     TextDecoration& set(Decoration decoration) {
         switch (decoration) {
         case Decoration::BOLD:
@@ -39,6 +45,23 @@ public:
         return *this;
     }
 
+    /**
+     * @brief Sets a specific text decoration style.
+     *
+     * @tparam D The decoration style to set.
+     * @return Reference to the current TextDecoration object.
+     */
+    template <Decoration D> TextDecoration& set() {
+        m_style.set<D>();
+        return *this;
+    }
+
+    /**
+     * @brief Unsets a text decoration style.
+     *
+     * @param decoration The decoration style to unset.
+     * @return Reference to the current TextDecoration object.
+     */
     TextDecoration& unset(Decoration decoration) {
         switch (decoration) {
         case Decoration::BOLD:
@@ -70,6 +93,21 @@ public:
         return *this;
     }
 
+    /**
+     * @brief Unsets a specific text decoration style.
+     *
+     * @tparam D The decoration style to unset.
+     * @return Reference to the current TextDecoration object.
+     */
+    template <Decoration D> TextDecoration& unset() {
+        m_style.unset<D>();
+        return *this;
+    }
+
+    /**
+     * @brief Retrieves the current text decoration style.
+     * @return The current text decoration style.
+     */
     [[nodiscard]] terminal::PixelStyle style() const { return m_style; }
 
 private:

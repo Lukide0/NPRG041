@@ -11,7 +11,7 @@
 namespace koterm::dom::input {
 
 std::shared_ptr<Checkbox> Checkbox::create(const BufferSpan& buffer, DomManager* manager) {
-    return std::make_shared<Checkbox>(buffer, manager, true);
+    return std::make_shared<Checkbox>(buffer, manager, true, false, true);
 }
 
 void Checkbox::prepare_buffer() {

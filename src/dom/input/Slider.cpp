@@ -11,7 +11,7 @@
 namespace koterm::dom::input {
 
 std::shared_ptr<Slider> Slider::create(const BufferSpan& buffer, DomManager* manager) {
-    return std::make_shared<Slider>(buffer, manager, true);
+    return std::make_shared<Slider>(buffer, manager, true, true, true);
 }
 
 bool Slider::handle_key(event::KeyCode key) {

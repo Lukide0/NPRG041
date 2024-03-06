@@ -26,6 +26,12 @@ class InvalidPositionException : public KotermException {
 public:
     using KotermException::KotermException;
 };
+
+class InvalidRangeException : public KotermException {
+public:
+    using KotermException::KotermException;
+};
+
 }
 
 #endif

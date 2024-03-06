@@ -42,18 +42,22 @@ static InteractScreen* g_active_screen = nullptr;
 
 void event_emiter(event::EventListener<event::Event>* listener, std::atomic<bool>* quit);
 
-InteractScreen::~InteractScreen() { exit(); }
+InteractScreen::~InteractScreen() { exit_loop(); }
 
-void InteractScreen::run() {
+void InteractScreen::before_run() {
     if (g_active_screen != nullptr) {
-        g_active_screen->exit();
+        g_active_screen->exit_loop();
     }
 
     g_active_screen = this;
     m_quit          = false;
+
+    if (!m_parser_thread_running) {
+        start_event_listener();
+    }
 }
 
-void InteractScreen::exit() {
+void InteractScreen::exit_loop() {
     if (g_active_screen == this) {
         g_active_screen = nullptr;
     }
@@ -70,7 +74,7 @@ void InteractScreen::exit() {
 
 void stop_active() {
     if (g_active_screen != nullptr) {
-        g_active_screen->exit();
+        g_active_screen->exit_loop();
     }
 }
 
@@ -130,7 +134,7 @@ void InteractScreen::start_event_listener() {
 
 void InteractScreen::main_loop() {
 
-    run();
+    before_run();
     start_event_listener();
 
     while (!m_quit) {
@@ -138,7 +142,7 @@ void InteractScreen::main_loop() {
         try_render();
     }
 
-    exit();
+    exit_loop();
 }
 
 inline void parse_bytes(

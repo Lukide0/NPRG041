@@ -22,6 +22,12 @@ public:
      * @return The buffer associated with the screen.
      */
     [[nodiscard]] const terminal::Buffer& buffer() const { return m_buffer; }
+
+    /**
+     * @brief Retrieves the buffer.
+     *
+     * @return The buffer associated with the screen.
+     */
     [[nodiscard]] terminal::Buffer& buffer() { return m_buffer; }
 
     /**
@@ -50,10 +56,32 @@ public:
      */
     void clear() { m_buffer.clear(); }
 
+    /**
+     * @brief Sets the root element of the document displayed on the screen.
+     *
+     * @param element The root element of the document.
+     */
     void set_document(const dom::element_t& element) { m_dom.set_root(element); }
+
+    /**
+     * @brief Retrieves the DOM manager associated with the screen.
+     *
+     * @return Reference to the DOM manager.
+     */
     [[nodiscard]] const dom::DomManager& dom_manager() const { return m_dom; }
+
+    /**
+     * @brief Retrieves the DOM manager associated with the screen.
+     *
+     * @return Reference to the DOM manager.
+     */
     [[nodiscard]] dom::DomManager& dom_manager() { return m_dom; }
 
+    /**
+     * @brief Checks if rendering is needed.
+     *
+     * @return True if rendering is needed, false otherwise.
+     */
     bool need_render() { return m_dom.need_render(); }
 
     /**
@@ -71,7 +99,16 @@ public:
         m_dom.request_render();
     }
 
-    void set_pallete(const pallete::Pallete& pallete) { m_pallete = pallete; }
+    /**
+     * @brief Sets the color palette of the screen.
+     *
+     * @param pallete The color palette to set.
+     */
+    void set_pallete(const pallete::Pallete& pallete) {
+        m_pallete = pallete;
+        m_buffer.set_background(pallete.background);
+        m_buffer.set_foreground(pallete.foreground);
+    }
 
     virtual ~BaseScreen() = default;
 

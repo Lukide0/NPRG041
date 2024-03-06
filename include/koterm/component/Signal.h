@@ -6,6 +6,11 @@
 #include <unordered_set>
 namespace koterm::component {
 
+/**
+ * @brief A signal class for implementing observer patterns.
+ *
+ * @tparam Args The types of arguments expected by the signal.
+ */
 template <typename... Args> class Signal {
 public:
     using delegate_t = std::function<void(Args...)>;
@@ -16,12 +21,32 @@ public:
     Signal& operator=(Signal&&)      = delete;
     Signal& operator=(const Signal&) = delete;
 
+    /**
+     * @brief Connects a delegate function to the signal.
+     * @param delegate The delegate function to connect.
+     */
     void connect(delegate_t delegate);
+
+    /**
+     * @brief Disconnects a delegate function from the signal.
+     * @param delegate The delegate function to disconnect.
+     */
     void disconnect(delegate_t delegate);
 
+    /**
+     * @brief Blocks the signal from emitting.
+     */
     void block() { m_blocking = true; }
+
+    /**
+     * @brief Unblocks the signal, allowing it to emit again.
+     */
     void unblock() { m_blocking = false; }
 
+    /**
+     * @brief Emits the signal with the given arguments.
+     * @param args The arguments to be passed to the connected delegate functions.
+     */
     void emit(Args... args);
     void operator()(Args... args);
 

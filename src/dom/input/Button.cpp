@@ -3,13 +3,12 @@
 #include "koterm/event/Event.h"
 #include "koterm/event/KeyCodes.h"
 #include "koterm/unit.h"
-#include <algorithm>
 #include <memory>
 
 namespace koterm::dom::input {
 
 std::shared_ptr<Button> Button::create(const BufferSpan& buffer, DomManager* manager) {
-    return std::make_shared<Button>(buffer, manager, true);
+    return std::make_shared<Button>(buffer, manager, true, false, true);
 }
 
 void Button::prepare_buffer() {
@@ -29,7 +28,7 @@ void Button::prepare_buffer() {
         }
     }
 
-    if (m_border.has()) {
+    if (m_border.has_style()) {
         m_border.render(m_buffer);
         if (!text_box.can_shrink()) {
             return;
@@ -52,7 +51,7 @@ void Button::calculate_requirements() {
     m_info.min_width  = static_cast<unit_t>(m_text.size());
     m_info.min_height = 2;
 
-    if (m_border.has()) {
+    if (m_border.has_style()) {
         m_info.min_width += 2;
         m_info.min_height += 2;
     }

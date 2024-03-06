@@ -23,15 +23,22 @@ public:
      */
     virtual void render();
 
+    /**
+     * @brief Checks if rendering is needed and performs rendering if necessary.
+     */
     void try_render() {
         if (need_render()) {
             render();
         }
     }
 
-    void clear() { m_buffer.clear(); }
-
 protected:
+    /**
+     * @brief Constructs a screen with the specified dimensions.
+     *
+     * @param width  The width of the screen.
+     * @param height The height of the screen.
+     */
     Screen(unit_t width, unit_t height)
         : BaseScreen(width, height) { }
 };

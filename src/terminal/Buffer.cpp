@@ -55,8 +55,6 @@ void Buffer::resize(unit_t width, unit_t height) {
 
     const std::size_t new_size = static_cast<std::size_t>(width) * height;
 
-    clear();
-
     m_pixels_style.resize(new_size);
     m_pixels_content.resize(new_size);
     m_pixels_color.resize(new_size);
@@ -65,6 +63,8 @@ void Buffer::resize(unit_t width, unit_t height) {
     m_width  = width;
     m_height = height;
     m_box    = { width - 1, height - 1 };
+
+    clear();
 }
 
 void Buffer::set_render_view(unit_t offset_x, unit_t offset_y, unit_t width, unit_t height) {
@@ -89,7 +89,7 @@ void Buffer::clear_rect(BoundingBox rect) {
             const std::size_t index = row_index + x;
 
             m_pixels_style[index]           = {};
-            m_pixels_color[index]           = { colors::SYS_DEFAULT.id(), colors::SYS_DEFAULT.id() };
+            m_pixels_color[index]           = { m_bg, m_fg };
             m_pixels_content[index].content = ' ';
             m_tiles[index].encoding         = TileEncoding::NONE;
         }

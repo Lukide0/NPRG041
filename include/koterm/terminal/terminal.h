@@ -35,8 +35,17 @@ using Features = util::bit_flags<FeatureFlags>;
  */
 bool init(Features features);
 
+/**
+ * @brief Sets the terminal to the state before calling init.
+ */
 void cleanup();
 
+/**
+ * @brief Registers a callback function to be called before terminal cleanup.
+ *
+ * @param handle The callback function to register.
+ * @return True if the callback function is successfully registered; otherwise, false.
+ */
 bool register_exit_handle(std::function<void()> handle);
 
 /**
@@ -74,9 +83,23 @@ Features features();
  */
 bool is_tty();
 
+/**
+ * @brief Updates the dimensions of the terminal.
+ */
 void update_dimensions();
 
+/**
+ * @brief Handles a signal received by the program.
+ *
+ * @param sig The signal to handle.
+ */
 void handle_signal(int sig);
+
+/**
+ * @brief Retrieves the error message associated with the last operation.
+ *
+ * @return A string view containing the error message, or an empty string view if no error occurred.
+ */
 std::string_view error_msg();
 
 }

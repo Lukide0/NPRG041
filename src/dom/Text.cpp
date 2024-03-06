@@ -6,7 +6,7 @@
 namespace koterm::dom {
 
 std::shared_ptr<Text> Text::create(const terminal::BufferSpan& buffer, DomManager* manager) {
-    return std::make_shared<Text>(buffer, manager);
+    return std::make_shared<Text>(buffer, manager, false, true, true);
 }
 
 void Text::prepare_buffer() {
