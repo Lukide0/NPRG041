@@ -2,6 +2,8 @@
 #include "koterm/dom/DomManager.h"
 #include "koterm/event/Event.h"
 #include "koterm/event/KeyCodes.h"
+#include "koterm/terminal/Color.h"
+#include "koterm/terminal/colors.h"
 #include "koterm/unit.h"
 #include <memory>
 
@@ -20,10 +22,14 @@ void Button::prepare_buffer() {
     unit_t width  = m_buffer.width();
     unit_t height = m_buffer.height();
 
+    const auto& pallete = get_pallete();
+
+    terminal::Color fg = (m_fg == terminal::colors::SYS_DEFAULT) ? pallete.foreground : m_fg;
+    terminal::Color bg = (m_bg == terminal::colors::SYS_DEFAULT) ? pallete.background : m_bg;
     if (has_focus()) {
         for (unit_t y = 1; y < height; y++) {
             for (unit_t x = 1; x < width; x++) {
-                m_buffer.set_pixel_color({ m_bg.id(), m_fg.id() }, x, y);
+                m_buffer.set_pixel_color({ bg.id(), fg.id() }, x, y);
             }
         }
     }
@@ -36,11 +42,11 @@ void Button::prepare_buffer() {
         text_box.shrink();
     }
 
-    auto background = m_bg;
-    auto foreground = m_fg;
+    auto background = bg;
+    auto foreground = fg;
     if (!has_focus()) {
-        background = get_pallete().background;
-        foreground = get_pallete().foreground;
+        background = pallete.background;
+        foreground = pallete.foreground;
     }
 
     auto text_buffer = BufferSpan { m_buffer.buffer(), text_box };

@@ -245,6 +245,7 @@ template <typename T> void Radiobox<T>::prepare_buffer() {
     box.left += 2;
 
     terminal::BufferSpan text_span { m_buffer.buffer() };
+    const auto& pallete = get_pallete();
 
     for (std::size_t i = 0; i < m_options.size(); i++) {
 
@@ -261,7 +262,7 @@ template <typename T> void Radiobox<T>::prepare_buffer() {
         text_box.bottom      = i;
 
         text_span.resize(text_box);
-        m_options[i].label.render(text_span);
+        m_options[i].label.render(text_span, pallete.foreground, pallete.background);
 
         if (has_focus() && i == m_highlighted) {
             for (unit_t x = 2; x < m_buffer.width(); x++) {

@@ -219,8 +219,8 @@ private:
     unit_t m_height;
     BoundingBox m_box;
     BoundingBox m_render_box;
-    Color::color_id m_fg;
-    Color::color_id m_bg;
+    Color::color_id m_fg = colors::SYS_DEFAULT.id();
+    Color::color_id m_bg = colors::SYS_DEFAULT.id();
 
     std::vector<PixelStyle> m_pixels_style;
     std::vector<PixelContent> m_pixels_content;

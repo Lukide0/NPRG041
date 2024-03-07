@@ -234,6 +234,7 @@ template <typename T> void Toggle<T>::prepare_buffer() {
     BoundingBox box = m_buffer.box();
     terminal::BufferSpan text_span { m_buffer.buffer() };
 
+    const auto& pallete = get_pallete();
     for (std::size_t i = 0; i < m_options.size(); i++) {
 
         if (i != 0) {
@@ -254,10 +255,9 @@ template <typename T> void Toggle<T>::prepare_buffer() {
 
         if (has_focus() && i == m_highlighted) {
             opt.label.modify_decoration().set(component::TextDecoration::Decoration::INVERSE);
-            opt.label.render(text_span);
         }
 
-        opt.label.render(text_span);
+        opt.label.render(text_span, pallete.foreground, pallete.background);
         opt.label.set_decoration(decoration);
 
         box.left += opt.label.size();
