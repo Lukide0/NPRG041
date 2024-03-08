@@ -144,7 +144,12 @@ bool init(Features features = FeatureFlags::NONE) {
     DWORD mode_out = 0;
     DWORD mode_in  = 0;
 
-    SetConsoleOutputCP(CP_UTF8);
+    if (SetConsoleOutputCP(CP_UTF8) == false)
+    {
+        g_terminfo->exit();
+        g_terminfo->error = "failed to set UTF-8 code page";
+        return false;
+    }
 
     if (console_in == INVALID_HANDLE_VALUE || !GetConsoleMode(console_in, &mode_in)) {
         g_terminfo->exit();
@@ -192,6 +197,9 @@ bool init(Features features = FeatureFlags::NONE) {
         enable_feature(ansi::Features::ANY_EVENT_MOUSE);
         // Extend position from 223 to 2015
         enable_feature(ansi::Features::EXT_MODE_MOUSE);
+        // SGR mode
+        enable_feature(ansi::Features::SGR_EXT_MODE_MOUSE);
+
     }
 
 #ifdef OS_LINUX

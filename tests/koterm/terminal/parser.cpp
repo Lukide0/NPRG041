@@ -154,13 +154,13 @@ TEST_CASE("Parser: buttons") {
 
                 switch (btn) {
                 case Btn::MB1:
-                    CHECK_EQ(event.btn1_press(), true);
+                    CHECK_EQ(event.btn1(), true);
                     break;
                 case Btn::MB2:
-                    CHECK_EQ(event.btn2_press(), true);
+                    CHECK_EQ(event.btn2(), true);
                     break;
                 case Btn::MB3:
-                    CHECK_EQ(event.btn3_press(), true);
+                    CHECK_EQ(event.btn3(), true);
                     break;
                 }
             }

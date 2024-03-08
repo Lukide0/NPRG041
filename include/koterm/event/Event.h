@@ -38,9 +38,16 @@ struct MouseEvent {
      * @param data The mouse event data.
      * @param btn The mouse button state.
      */
-    MouseEvent(const terminal::Parser::MouseEvent& data, Btn btn = Btn::NONE)
-        : m_data(data)
-        , m_btn(btn) { }
+    MouseEvent(const terminal::Parser::MouseEvent& data)
+        : m_data(data) {
+        if (data.btn1()) {
+            m_btn = Btn::LEFT;
+        } else if (data.btn2()) {
+            m_btn = Btn::MIDDLE;
+        } else if (data.btn3()) {
+            m_btn = Btn::RIGHT;
+        }
+    }
 
     /**
      * @brief Checks if the specified button is pressed.
@@ -106,7 +113,7 @@ struct MouseEvent {
 
 private:
     terminal::Parser::MouseEvent m_data;
-    Btn m_btn;
+    Btn m_btn = Btn::NONE;
 };
 
 /**
@@ -184,9 +191,9 @@ public:
         return e;
     }
 
-    static Event create_mouse_btn(const terminal::Parser::MouseEvent& mouse_info, MouseEvent::Btn btn) {
+    static Event create_mouse_btn(const terminal::Parser::MouseEvent& mouse_info) {
         Event e;
-        e.m_data = MouseEvent { mouse_info, btn };
+        e.m_data = MouseEvent { mouse_info };
         e.m_type = EventType::MOUSE_BTN;
 
         return e;
@@ -224,10 +231,9 @@ public:
         return e;
     }
 
-    static Event
-    create_from_mouse(const terminal::Parser::MouseEvent& mouse_info, MouseEvent::Btn btn = MouseEvent::Btn::NONE) {
+    static Event create_from_mouse(const terminal::Parser::MouseEvent& mouse_info) {
         if (mouse_info.is_button()) {
-            return create_mouse_btn(mouse_info, btn);
+            return create_mouse_btn(mouse_info);
         } else if (mouse_info.is_scroll()) {
             return create_mouse_scroll(mouse_info);
         } else {

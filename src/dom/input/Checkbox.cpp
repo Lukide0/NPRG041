@@ -33,7 +33,7 @@ void Checkbox::prepare_buffer() {
         style.set<terminal::PixelStyle::StyleFlags::BOLD>();
     }
 
-    const auto width = std::min<unit_t>(m_buffer.width(), text.size());
+    const auto width = std::min<unit_t>(m_buffer.width(), static_cast<unit_t>(text.size()));
 
     for (unit_t i = 0; i < width; i++) {
         m_buffer.set_pixel_content(text[i], i, 0);

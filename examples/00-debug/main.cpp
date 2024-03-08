@@ -192,15 +192,19 @@ void print_event_mouse(const terminal::Parser::MouseEvent& event) {
     } else if (!event.is_button()) {
         std::cout << "  type: move\n";
     } else {
-        std::cout << "  type: click\n  btn: ";
-        if (event.btn_release()) {
-            std::cout << "release";
-        } else if (event.btn1_press()) {
-            std::cout << "left press";
-        } else if (event.btn2_press()) {
-            std::cout << "middle press";
+
+        if (event.btn_press()) {
+            std::cout << "  type: button press\n  btn: ";
         } else {
-            std::cout << "right press";
+            std::cout << "  type: button release\n  btn: ";
+        }
+
+        if (event.btn1()) {
+            std::cout << "left";
+        } else if (event.btn2()) {
+            std::cout << "middle";
+        } else {
+            std::cout << "right";
         }
         std::cout << '\n';
     }

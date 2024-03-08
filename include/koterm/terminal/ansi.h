@@ -29,7 +29,7 @@ enum class Features {
     ANY_EVENT_MOUSE = 1003,
 
     EXT_MODE_MOUSE     = 1005,
-    SRG_EXT_MODE_MOUSE = 1006,
+    SGR_EXT_MODE_MOUSE = 1006,
 
     ALTERNATIVE_SCREEN = 1049,
 };

@@ -3,9 +3,11 @@
 
 #include "koterm/event/KeyCodes.h"
 #include "koterm/unit.h"
+#include "koterm/util/FixedStack.h"
 #include "koterm/util/ascii.h"
 #include "koterm/util/bits.h"
 #include "koterm/util/utf8.h"
+#include <charconv>
 #include <cstdint>
 #include <span>
 #include <string_view>
@@ -33,13 +35,13 @@ public:
         static constexpr std::uint8_t BUTTON_BIT  = 5;
         static constexpr std::uint8_t WHEEL_BIT   = 6;
 
-        [[nodiscard]] bool btn1_press() const { return !bits::is_set<MB1_BIT>(code) && !bits::is_set<MB3_BIT>(code); }
-        [[nodiscard]] bool btn2_press() const { return bits::is_set<MB2_BIT>(code); }
-        [[nodiscard]] bool btn3_press() const { return bits::is_set<MB3_BIT>(code); }
-        [[nodiscard]] bool btn_release() const { return bits::is_set<0, 1>(code); }
-        [[nodiscard]] bool btn_press() const { return !btn_release(); }
-        [[nodiscard]] bool scroll_back() const { return btn1_press(); }
-        [[nodiscard]] bool scroll_forward() const { return btn2_press(); }
+        [[nodiscard]] bool btn1() const { return !bits::is_set<MB1_BIT>(code) && !bits::is_set<MB3_BIT>(code); }
+        [[nodiscard]] bool btn2() const { return bits::is_set<MB2_BIT>(code); }
+        [[nodiscard]] bool btn3() const { return bits::is_set<MB3_BIT>(code); }
+        [[nodiscard]] bool btn_release() const { return !press; }
+        [[nodiscard]] bool btn_press() const { return press; }
+        [[nodiscard]] bool scroll_back() const { return btn1(); }
+        [[nodiscard]] bool scroll_forward() const { return btn2(); }
         [[nodiscard]] bool shift() const { return bits::is_set<SHIFT_BIT>(code); }
         [[nodiscard]] bool meta() const { return bits::is_set<META_BIT>(code); }
         [[nodiscard]] bool control() const { return bits::is_set<CONTROL_BIT>(code); }
@@ -50,6 +52,7 @@ public:
         }
 
         std::uint8_t code;
+        bool press;
         point_t mouse;
     };
 
@@ -123,6 +126,11 @@ private:
      */
     unit_t span_to_value(span_t span) { return static_cast<unit_t>(util::utf8_codepoint(span) - 32); }
 
+    template <std::integral T> bool convert_span_to_value(const char* first, const char* last, T& value) {
+        auto result = std::from_chars(first, last, value);
+        return result.ec == std::errc {} && result.ptr == last;
+    }
+
     ParserState parse_value(span_t& content, span_t& out);
     ParserState parse_utf8(span_t content, std::size_t& out_bytes);
     ParserState parse_esc(span_t content);
@@ -132,11 +140,15 @@ private:
     ParserState parse_cursor(span_t content);
 
     ParserState parse_tracking(span_t content);
+    ParserState parse_tracking_sgr(span_t content);
+    std::uint8_t parse_sgr_value(span_t content, std::size_t& out_bytes);
 
     std::vector<std::uint8_t> m_buffer;
     EventType m_type;
 
     MouseEvent m_mouse;
+    util::FixedStack<std::uint8_t, 3> m_mouse_btn_press;
+
     event::KeyCode m_key;
     point_t m_cursor;
 };

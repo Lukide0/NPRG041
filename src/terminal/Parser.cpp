@@ -3,6 +3,7 @@
 #include "koterm/unit.h"
 #include "koterm/util/ConstMap.h"
 #include "koterm/util/ascii.h"
+#include "koterm/util/range.h"
 #include <array>
 #include <charconv>
 #include <cstddef>
@@ -162,6 +163,9 @@ Parser::ParserState Parser::parse_csi(span_t content) {
     // Tracking
     case 'M':
         return parse_tracking(content.subspan(1));
+    // Tracking SGR
+    case '<':
+       return parse_tracking_sgr(content.subspan(1));
     default:
         return parse_key_csi(content);
     }
@@ -205,13 +209,94 @@ Parser::ParserState Parser::parse_tracking(span_t content) {
         return state;
     }
 
-    m_type       = EventType::MOUSE;
-    m_mouse.code = content.front();
+    m_type = EventType::MOUSE;
+
+    const std::uint8_t cb = content.front();
+    m_mouse.press         = !util::bits<std::uint8_t>::is_set<0, 1>(cb);
+
+    if (m_mouse.press) {
+        m_mouse.code = cb;
+        m_mouse_btn_press.push(cb);
+    } else if (!m_mouse_btn_press.empty()) {
+        m_mouse.code = m_mouse_btn_press.top();
+        m_mouse_btn_press.pop();
+    } else {
+        m_mouse.code = cb;
+    }
 
     m_mouse.mouse.x = span_to_value(content.subspan(cb_size, cx_size));
     m_mouse.mouse.y = span_to_value(content.subspan(cb_size + cx_size, cy_size));
 
     return ParserState::EVENT;
+}
+
+Parser::ParserState Parser::parse_tracking_sgr(span_t content) {
+    if (content.empty()) {
+        return ParserState::UNCOMPLETE;
+    }
+
+    std::string_view content_str { reinterpret_cast<char*>(content.data()),
+                                   reinterpret_cast<char*>(content.data() + content.size()) };
+
+    std::size_t cb_size;
+    std::size_t cx_size;
+    std::size_t cy_size;
+
+    std::uint8_t end = parse_sgr_value(content, cb_size);
+    if (end == '\0') {
+        return ParserState::UNCOMPLETE;
+    } else if (end != ';' || cb_size == 0) {
+        return ParserState::UNKNOWN;
+    }
+
+    if (!convert_span_to_value(content_str.data(), content_str.data() + cb_size, m_mouse.code)) {
+        return ParserState::CHARACTER;
+    }
+
+    end = parse_sgr_value(content.subspan(cb_size + 1), cx_size);
+    if (end == '\0') {
+        return ParserState::UNCOMPLETE;
+    } else if (end != ';' || cx_size == 0) {
+        return ParserState::UNKNOWN;
+    }
+
+    if (!convert_span_to_value(
+            content_str.data() + cb_size + 1, content_str.data() + cb_size + cx_size + 1, m_mouse.mouse.x
+        )) {
+        return ParserState::CHARACTER;
+    }
+
+    end = parse_sgr_value(content.subspan(cb_size + cx_size + 2), cy_size);
+    if (end == '\0') {
+        return ParserState::UNCOMPLETE;
+    } else if ((end != 'M' && end != 'm') || cy_size == 0) {
+        return ParserState::UNKNOWN;
+    }
+
+    if (!convert_span_to_value(
+            content_str.data() + cb_size + cx_size + 2,
+            content_str.data() + cb_size + cx_size + cy_size + 2,
+            m_mouse.mouse.y
+        )) {
+        return ParserState::CHARACTER;
+    }
+
+    m_type       = EventType::MOUSE;
+    m_mouse.press   = (end == 'M');
+    m_mouse.code += 32;
+
+    return ParserState::EVENT;
+}
+
+std::uint8_t Parser::parse_sgr_value(span_t content, std::size_t& out_bytes) {
+    for (std::size_t i = 0; i < content.size(); i++) {
+        if (!util::range::inside<char>(content[i], '0', '9')) {
+            out_bytes = i;
+            return content[i];
+        }
+    }
+
+    return '\0';
 }
 
 Parser::ParserState Parser::parse_key_csi(span_t content) {
@@ -444,11 +529,8 @@ Parser::ParserState Parser::parse_cursor(span_t content) {
     const auto* row_ref_end    = row_ref.data() + row_ref.size();
     const auto* column_ref_end = column_ref.data() + column_ref.size();
 
-    // https://github.com/cplusplus/papers/issues/744
-    auto [row_end, row_err]       = std::from_chars(row_ref.data(), row_ref_end, row_value);
-    auto [column_end, column_err] = std::from_chars(column_ref.data(), column_ref_end, column_value);
-
-    if (row_err != std::errc() || row_end != row_ref_end || column_err != std::errc() || column_end != column_ref_end) {
+    if (!convert_span_to_value(row_ref.data(), row_ref_end, row_value)
+        || !convert_span_to_value(column_ref.data(), column_ref_end, column_value)) {
         return ParserState::UNKNOWN;
     }
 

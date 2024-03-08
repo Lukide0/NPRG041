@@ -145,12 +145,8 @@ void InteractScreen::main_loop() {
     exit_loop();
 }
 
-inline void parse_bytes(
-    const std::span<std::uint8_t>& bytes,
-    terminal::Parser& parser,
-    event::EventSender<event::Event>& sender,
-    event::MouseEvent::Btn& last_pressed
-) {
+inline void
+parse_bytes(const std::span<std::uint8_t>& bytes, terminal::Parser& parser, event::EventSender<event::Event>& sender) {
     using event::Event;
     using ParserState     = terminal::Parser::ParserState;
     using ParserEventType = terminal::Parser::EventType;
@@ -164,30 +160,9 @@ inline void parse_bytes(
             break;
         case ParserState::EVENT:
             switch (parser.event_type()) {
-            case ParserEventType::MOUSE: {
-                const auto& mouse = parser.mouse();
-                if (!mouse.is_button()) {
-                    sender.send(Event::create_from_mouse(mouse));
-                    break;
-                }
-
-                if (mouse.btn_release()) {
-                    sender.send(Event::create_from_mouse(mouse, last_pressed));
-                    last_pressed = event::MouseEvent::Btn::NONE;
-                    break;
-                }
-
-                if (mouse.btn3_press()) {
-                    last_pressed = event::MouseEvent::Btn::RIGHT;
-                } else if (mouse.btn2_press()) {
-                    last_pressed = event::MouseEvent::Btn::MIDDLE;
-                } else {
-                    last_pressed = event::MouseEvent::Btn::LEFT;
-                }
-
-                sender.send(Event::create_from_mouse(mouse, last_pressed));
+            case ParserEventType::MOUSE:
+                sender.send(Event::create_from_mouse(parser.mouse()));
                 break;
-            }
             case ParserEventType::KEY:
                 sender.send(Event::create_key(parser.key()));
                 break;
@@ -236,8 +211,7 @@ void event_emiter(event::EventListener<event::Event>* listener, std::atomic<bool
     auto parser = terminal::Parser();
     std::array<std::uint8_t, 256> buffer;
 
-    Dimensions dims                     = terminal::dimensions();
-    event::MouseEvent::Btn last_pressed = event::MouseEvent::Btn::NONE;
+    Dimensions dims = terminal::dimensions();
     while (!quit->load()) {
         if (available_input()) {
             long bytes = read(STDIN_FILENO, buffer.data(), buffer.size());
@@ -245,9 +219,7 @@ void event_emiter(event::EventListener<event::Event>* listener, std::atomic<bool
                 continue;
             }
 
-            parse_bytes(
-                std::span<std::uint8_t> { buffer.data(), static_cast<std::size_t>(bytes) }, parser, sender, last_pressed
-            );
+            parse_bytes(std::span<std::uint8_t> { buffer.data(), static_cast<std::size_t>(bytes) }, parser, sender);
         } else {
             Dimensions new_dims = terminal::dimensions();
             if (new_dims != dims) {
@@ -270,13 +242,13 @@ void event_emiter(event::EventListener<event::Event>* listener, std::atomic<bool
 
     auto sender = listener->make_sender();
 
-    auto parser                         = terminal::Parser();
-    Dimensions dims                     = terminal::dimensions();
-    event::MouseEvent::Btn last_pressed = event::MouseEvent::Btn::NONE;
+    auto parser     = terminal::Parser();
+    Dimensions dims = terminal::dimensions();
 
     HANDLE console_in = GetStdHandle(STD_INPUT_HANDLE);
 
     std::vector<INPUT_RECORD> records { BUFFER_SIZE };
+    std::vector<std::uint8_t> character_bytes(4);
 
     while (!quit->load()) {
         const auto wait = WaitForSingleObject(console_in, TIMEOUT_MS);
@@ -289,7 +261,7 @@ void event_emiter(event::EventListener<event::Event>* listener, std::atomic<bool
             continue;
         }
 
-        records.reserve(events_count);
+        records.resize(events_count);
         DWORD read_events = 0;
         ReadConsoleInput(console_in, records.data(), events_count, &read_events);
 
@@ -304,25 +276,27 @@ void event_emiter(event::EventListener<event::Event>* listener, std::atomic<bool
                     break;
                 }
 
-                wchar_t key_data = key.uChar.UnicodeChar;
-                auto* data_raw   = reinterpret_cast<std::uint8_t*>(&key_data);
+                character_bytes.resize(4);
+                int size = WideCharToMultiByte(
+                    CP_UTF8, 0, &key.uChar.UnicodeChar, 1, reinterpret_cast<char*>(character_bytes.data()), 4, nullptr, nullptr
+                );
 
-                std::span<std::uint8_t> buffer { data_raw, sizeof(wchar_t) };
+                character_bytes.resize(size);
+                std::span<std::uint8_t> buffer {character_bytes };
 
-                parse_bytes(buffer, parser, sender, last_pressed);
+                parse_bytes(buffer, parser, sender);
                 break;
             }
             case WINDOW_BUFFER_SIZE_EVENT:
                 terminal::update_dimensions();
                 sender.send(Event::create_resize(terminal::dimensions()));
                 break;
+            case MOUSE_EVENT:
             default:
                 break;
             }
         }
     }
-
-    CloseHandle(console_in);
 }
 #endif
 }
