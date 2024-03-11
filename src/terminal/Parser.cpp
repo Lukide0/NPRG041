@@ -35,6 +35,10 @@
  * - Extended coordinates (UTF-8, 1005):
  *   - Enables UTF-8 encoding for Cx, Cy, and Cb.
  *   - Expands maximum encodable position to 2015.
+ *
+ * - SRG coordinates (1006)
+ *  - CSI < NUM ; NUM ; NUM m or M
+ *  - NUM is decimal number (10,75,...) used instead of encoding (Cb doesn't need 32 offset)
  */
 
 namespace koterm::terminal {
