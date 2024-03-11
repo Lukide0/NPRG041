@@ -7,28 +7,28 @@
 
 namespace koterm::screen::pallete {
 
-using namespace koterm::terminal::colors;
+using koterm::terminal::colors;
 using namespace std::string_view_literals;
 
 constexpr auto DEFAULT = Pallete(
-    SYS_BLACK,
-    SYS_RED,
-    SYS_GREEN,
-    SYS_YELLOW,
-    SYS_BLUE,
-    SYS_MAGENTA,
-    SYS_CYAN,
-    SYS_WHITE,
-    SYS_BRIGHT_BLACK,
-    SYS_BRIGHT_RED,
-    SYS_BRIGHT_GREEN,
-    SYS_BRIGHT_YELLOW,
-    SYS_BRIGHT_BLUE,
-    SYS_BRIGHT_MAGENTA,
-    SYS_BRIGHT_CYAN,
-    SYS_BRIGHT_WHITE,
-    SYS_DEFAULT, // foreground
-    SYS_DEFAULT // background
+    colors::SYS_BLACK,
+    colors::SYS_RED,
+    colors::SYS_GREEN,
+    colors::SYS_YELLOW,
+    colors::SYS_BLUE,
+    colors::SYS_MAGENTA,
+    colors::SYS_CYAN,
+    colors::SYS_WHITE,
+    colors::SYS_BRIGHT_BLACK,
+    colors::SYS_BRIGHT_RED,
+    colors::SYS_BRIGHT_GREEN,
+    colors::SYS_BRIGHT_YELLOW,
+    colors::SYS_BRIGHT_BLUE,
+    colors::SYS_BRIGHT_MAGENTA,
+    colors::SYS_BRIGHT_CYAN,
+    colors::SYS_BRIGHT_WHITE,
+    colors::SYS_DEFAULT, // foreground
+    colors::SYS_DEFAULT // background
 );
 
 constexpr auto DRACULA = Pallete(

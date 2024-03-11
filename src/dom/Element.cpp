@@ -135,6 +135,7 @@ bool Element::handle_event(const event::Event& event) {
 }
 
 bool Element::handle_change_box(const BoundingBox& box) {
+    m_buffer.clear();
     m_buffer.resize(box);
     request_update();
     return true;
