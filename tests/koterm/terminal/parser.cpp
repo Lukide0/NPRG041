@@ -16,10 +16,13 @@ inline std::ostream& operator<<(std::ostream& stream, point_t point) {
     return stream;
 }
 
+#pragma warning(push)
+#pragma warning(disable : 4566)
 constexpr auto pos_1    = "\u0021"sv;
 constexpr auto pos_10   = "\u002a"sv;
 constexpr auto pos_100  = "\u0084"sv;
 constexpr auto pos_1000 = "\u0408"sv;
+#pragma warning(pop)
 
 constexpr auto positions = std::to_array<std::pair<std::string_view, unit_t>>({
     {   pos_1,    1},

@@ -6,8 +6,9 @@ using namespace koterm::terminal;
 
 TEST_CASE("Tiles: Simple combine") {
 
-    std::uint8_t code = 0;
-    KOTERM_TEST_GENERATOR(code, 1, 4) {
+    std::size_t u_code = 0;
+    KOTERM_TEST_GENERATOR(u_code, 1, 4) {
+        auto code = static_cast<std::uint8_t>(u_code);
 
         const auto top    = TileEncoding({ code, 0, 0, 0 });
         const auto right  = TileEncoding({ 0, code, 0, 0 });
@@ -43,9 +44,9 @@ TEST_CASE("Tiles: Simple combine") {
 
 TEST_CASE("Tile: Complex combine") {
 
-    std::uint8_t encoding = 0;
+    std::size_t encoding = 0;
     KOTERM_TEST_GENERATOR(encoding, 0, 256) {
-        TileEncoding tile { encoding };
+        TileEncoding tile { static_cast<std::uint8_t>(encoding) };
 
         // HACK: Combine not valid tile with itself
         tile = tile | tile;
