@@ -110,7 +110,8 @@ void rollback_terminal() { g_terminfo.reset(); }
 
 bool init(Features features = FeatureFlags::NONE) {
     if (has_initialized()) {
-        return true;
+        g_terminfo->error = "the terminal has already been initialized";
+        return false;
     }
 
     g_terminfo                = std::make_unique<TermInfo>();
