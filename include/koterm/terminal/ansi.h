@@ -38,6 +38,8 @@ constexpr std::string_view CURSOR_QUERY     = CSI_CODE "6n";
 constexpr std::string_view CURSOR_TO_ORIGIN = CSI_CODE "H";
 constexpr std::string_view CURSOR_SAVE      = CSI_CODE "7";
 constexpr std::string_view CURSOR_RESTORE   = CSI_CODE "8";
+constexpr std::string_view CURSOR_HIDE      = CSI_CODE "?25l";
+constexpr std::string_view CURSOR_SHOW      = CSI_CODE "?25h";
 
 constexpr std::string_view ERASE_FROM_CURSOR_TO_SCREEN_END      = CSI_CODE "0J";
 constexpr std::string_view ERASE_TO_CURSOR                      = CSI_CODE "1J";

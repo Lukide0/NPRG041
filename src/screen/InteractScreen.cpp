@@ -5,6 +5,7 @@
 #include "koterm/event/EventSender.h"
 #include "koterm/terminal/Parser.h"
 #include "koterm/terminal/terminal.h"
+#include "koterm/terminal/Cursor.h"
 #include "koterm/unit.h"
 #include "koterm/util/os.h"
 #include <algorithm>
@@ -52,6 +53,8 @@ void InteractScreen::before_run() {
     g_active_screen = this;
     m_quit          = false;
 
+    terminal::Cursor::hide();
+
     if (!m_parser_thread_running) {
         start_event_listener();
     }
@@ -60,6 +63,7 @@ void InteractScreen::before_run() {
 void InteractScreen::exit_loop() {
     if (g_active_screen == this) {
         g_active_screen = nullptr;
+        terminal::Cursor::show();
     }
 
     if (!m_quit) {
@@ -137,12 +141,15 @@ void InteractScreen::main_loop() {
     before_run();
     start_event_listener();
 
+    terminal::Cursor::hide();
+
     while (!m_quit) {
         handle_events();
         try_render();
     }
 
     exit_loop();
+    terminal::Cursor::show();
 }
 
 inline void
@@ -282,6 +289,11 @@ void event_emiter(event::EventListener<event::Event>* listener, std::atomic<bool
                 );
 
                 character_bytes.resize(size);
+                if (size == 1 && character_bytes.front() == '\r')
+                {
+                    character_bytes[0] = '\n';
+                }
+
                 std::span<std::uint8_t> buffer {character_bytes };
 
                 parse_bytes(buffer, parser, sender);

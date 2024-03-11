@@ -29,6 +29,9 @@ public:
 
     static void flush() { std::cout.flush(); }
 
+    static void hide() { std::cout << ansi::CURSOR_HIDE; }
+    static void show() { std::cout << ansi::CURSOR_SHOW; }
+
     template <EraseMode MODE> static void erase() {
         switch (MODE) {
         case EraseMode::CURSOR_TO_SCREEN_END:
