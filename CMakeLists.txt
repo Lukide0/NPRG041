@@ -11,8 +11,8 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/create_example.cmake)
 # -----------------------------------------------------------------------------
 # Set options
 option(ENABLE_KOTERM_TESTING "Build and run tests" ON)
-option(BUILD_EXAMPLES "Build examples" ON)
-option(KOTERM_DEBUG "Enable debug build" ON)
+option(BUILD_EXAMPLES "Build examples" OFF)
+option(KOTERM_DEBUG "Enable debug build" OFF)
 option(KOTERM_DEBUG_DOM "Show elements bounding boxes" OFF)
 option(DISABLE_EXCEPTIONS "Disable c++ exceptions" OFF)
 
@@ -49,13 +49,17 @@ configure_file("${TEMPLATE_FILES_DIR}/config.h" "${GEN_FILES_DIR}/config.h"
                @ONLY)
 
 target_include_directories(${LIBRARY_NAME} PUBLIC ${GEN_FILES_DIR})
-
 add_subdirectory("${PROJECT_SOURCE_DIR}/src")
 
-if(ENABLE_KOTERM_TESTING MATCHES ON)
-    add_subdirectory(tests)
-endif()
+if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
 
-if(BUILD_EXAMPLES MATCHES ON)
-    add_subdirectory(examples)
+    if(ENABLE_KOTERM_TESTING MATCHES ON)
+        enable_testing()
+        add_subdirectory(tests)
+    endif()
+
+    if(BUILD_EXAMPLES MATCHES ON)
+        add_subdirectory(examples)
+    endif()
+
 endif()

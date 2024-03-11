@@ -1,21 +1,22 @@
 include_guard(GLOBAL)
 
-include(ExternalProject)
-
+include(FetchContent)
 find_package(Git REQUIRED)
 
-ExternalProject_Add(
-  doctest
-  PREFIX ${CMAKE_BINARY_DIR}/doctest
-  GIT_REPOSITORY https://github.com/doctest/doctest.git
-  UPDATE_COMMAND ${GIT_EXECUTABLE} pull
-  CONFIGURE_COMMAND ""
-  TIMEOUT 5
-  BUILD_COMMAND ""
-  INSTALL_COMMAND ""
-  LOG_DOWNLOAD ON)
+FetchContent_Declare(
+    doctest
+    GIT_REPOSITORY https://github.com/doctest/doctest.git
+    GIT_TAG "v2.4.11"
+    GIT_SHALLOW TRUE
+    GIT_PROGRESS ON
+)
+FetchContent_MakeAvailable(doctest)
 
-ExternalProject_Get_Property(doctest source_dir)
+FetchContent_GetProperties(doctest)
+if (NOT doctest_POPULATED)
+    FetchContent_Populate(doctest)
+endif()
+
 set(DOCTEST_INCLUDE_DIR
-    ${source_dir}/doctest
+    ${doctest_SOURCE_DIR}/doctest
     CACHE INTERNAL "Path to include folder for doctest")

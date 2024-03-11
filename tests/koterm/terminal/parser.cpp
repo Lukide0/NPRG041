@@ -16,19 +16,18 @@ inline std::ostream& operator<<(std::ostream& stream, point_t point) {
     return stream;
 }
 
-#pragma warning(push)
-#pragma warning(disable : 4566)
-constexpr auto pos_1    = "\u0021"sv;
-constexpr auto pos_10   = "\u002a"sv;
-constexpr auto pos_100  = "\u0084"sv;
-constexpr auto pos_1000 = "\u0408"sv;
-#pragma warning(pop)
+constexpr auto pos_1  = "\u0021"sv;
+constexpr auto pos_10 = "\u002a"sv;
+constexpr auto pos_20 = "\u0034"sv;
+constexpr auto pos_50 = "\u0052"sv;
+constexpr auto pos_94 = "\u007e"sv;
 
 constexpr auto positions = std::to_array<std::pair<std::string_view, unit_t>>({
-    {   pos_1,    1},
-    {  pos_10,   10},
-    { pos_100,  100},
-    {pos_1000, 1000}
+    { pos_1,  1},
+    {pos_10, 10},
+    {pos_20, 20},
+    {pos_50, 50},
+    {pos_94, 94}
 });
 
 std::vector<std::uint8_t> create_btn_event(std::string_view cx, std::string_view cy, char cb) {
