@@ -1,23 +1,27 @@
+#include "koterm/component/Alignment.h"
+#include "koterm/component/Border.h"
+#include "koterm/terminal/terminal.h"
 #include <array>
 #include <cstdint>
 #include <iostream>
+#include <koterm/dom/Text.h>
 #include <koterm/dom/input/Button.h>
 #include <koterm/dom/layout/Box.h>
-#include <koterm/dom/Text.h>
 #include <koterm/screen/InteractScreen.h>
 #include <koterm/terminal/TerminalGuard.h>
 #include <koterm/terminal/colors.h>
+#include <memory>
 #include <string>
 #include <vector>
 
 constexpr int EXIT_OK   = 0;
 constexpr int EXIT_FAIL = 1;
 
-using koterm::dom::input::Button;
-using koterm::terminal::FeatureFlags;
 using koterm::component::Alignment;
 using koterm::component::Border;
+using koterm::dom::input::Button;
 using koterm::terminal::colors;
+using koterm::terminal::FeatureFlags;
 
 void style_button(std::shared_ptr<Button>& btn) {
     btn->modify_border().set_style(Border::Style::THIN);
@@ -31,12 +35,12 @@ void style_button(std::shared_ptr<Button>& btn) {
 
 int main() {
 
-    using koterm::terminal::TerminalGuard;
     using koterm::screen::InteractScreen;
+    using koterm::terminal::TerminalGuard;
 
-    using koterm::dom::layout::VBox;
-    using koterm::dom::layout::HBox;
     using koterm::dom::Text;
+    using koterm::dom::layout::HBox;
+    using koterm::dom::layout::VBox;
 
     // Defining required terminal features
     constexpr auto required_features = std::array {
@@ -55,7 +59,7 @@ int main() {
     }
 
     auto dims   = koterm::terminal::dimensions();
-    auto screen = InteractScreen::create(500, 20);
+    auto screen = InteractScreen::create(dims.width, dims.height);
     // alternative is to set base width and height
     // InteractScreen::create(50, 20);
 
@@ -63,13 +67,13 @@ int main() {
     screen->set_grow(false);
 
     // Creating UI elements for the interactive screen.
-    auto box     = VBox::create(screen.get());
+    auto box          = VBox::create(screen.get());
     auto counter_text = Text::create(screen.get());
     auto btn_exit     = Button::create(screen.get());
 
-    auto btn_add = Button::create(screen.get());
-    auto btn_sub      = Button::create(screen.get());
-    auto buttons_box  = HBox::create(screen.get(), { btn_add, btn_sub });
+    auto btn_add     = Button::create(screen.get());
+    auto btn_sub     = Button::create(screen.get());
+    auto buttons_box = HBox::create(screen.get(), { btn_add, btn_sub });
 
     // Styling the exit button.
     style_button(btn_exit);
@@ -100,7 +104,7 @@ int main() {
     });
 
     // Handling subtract button press event and updating the counter.
-     btn_sub->on_press().connect([&]() {
+    btn_sub->on_press().connect([&]() {
         counter -= 1;
         counter_text->set_text(std::to_string(counter));
     });
