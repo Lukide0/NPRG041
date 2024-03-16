@@ -1,6 +1,7 @@
 .cache/
 .vs
 .vscode
+docs/
 
 # Prerequisites
 *.d
