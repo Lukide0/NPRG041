@@ -1,0 +1,16 @@
+stages:
+    - build
+    - test
+
+build:
+    stage: build
+    script:
+        - mkdir build
+        - cmake --preset=ci-linux
+        - cmake --build build/ci/ci-linux
+test:
+    stage: test
+    needs: [build]
+    script:
+        - cd build/ci/ci-linux
+        - ctest --test-dir build/ci/ci-linux/tests
