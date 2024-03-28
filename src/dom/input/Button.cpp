@@ -78,16 +78,12 @@ bool Button::handle_key(event::KeyCode key) {
 }
 
 bool Button::handle_mouse_click(const event::MouseEvent& event) {
-    if (!is_mouse_inside(event.pos())) {
-        return false;
-    }
-
-    if (event.btn_pressed<event::MouseEvent::Btn::LEFT>()) {
-        focus();
-        return true;
-    } else if (event.btn_released<event::MouseEvent::Btn::LEFT>()) {
+    if (event.btn_released<event::MouseEvent::Btn::LEFT>() && has_focus()) {
         m_onpress.emit();
         blur();
+        return true;
+    } else if (is_mouse_inside(event.pos()) && event.btn_pressed<event::MouseEvent::Btn::LEFT>()) {
+        focus();
         return true;
     }
 
