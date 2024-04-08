@@ -130,7 +130,7 @@ void Input::prepare_buffer() {
 }
 
 void Input::calculate_requirements() {
-    m_info.min_width  = static_cast<unit_t>(m_value.size() + 1);
+    m_info.min_width  = 2;
     m_info.min_height = 1;
 }
 

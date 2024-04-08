@@ -126,9 +126,11 @@ void Box<Direction>::update_layout_grow(unit_t min_size, unit_t target_size, std
                                                                     : req.min_height + (req.grow_y * extra) / grow;
 
         if constexpr (Direction == BoxDirection::HORIZONTAL) {
-            el->handle_change_box({ box.top, box.bottom, offset, offset + size });
+            const unit_t end = std::max<unit_t>(box.right, offset + size);
+            el->handle_change_box({ box.top, box.bottom, offset, end });
         } else {
-            el->handle_change_box({ offset, offset + size, box.left, box.right });
+            const unit_t end = std::max<unit_t>(box.bottom, offset + size);
+            el->handle_change_box({ offset, end, box.left, box.right });
         }
 
         offset += size + m_gap + 1;
