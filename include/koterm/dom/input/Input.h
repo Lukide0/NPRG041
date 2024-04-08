@@ -9,6 +9,7 @@
 #include <cstddef>
 #include <memory>
 #include <string>
+#include <utility>
 
 namespace koterm::dom::input {
 
@@ -68,6 +69,27 @@ public:
      */
     const std::string& value() const { return m_value; }
 
+    /**
+     * @brief Sets the text content.
+     * @param text The new text content.
+     * @note Resets cursor position.
+     */
+    void set_value(const std::string& val) {
+        m_value      = val;
+        m_char_index = 0;
+        m_onchange.emit(m_value);
+    }
+
+    /**
+     * @brief Sets the text content.
+     * @param text The new text content.
+     * @note Resets cursor position.
+     */
+    void set_value(std::string&& val) {
+        m_value      = std::move(val);
+        m_char_index = 0;
+        m_onchange.emit(m_value);
+    }
     /**
      * @brief Accessor for the onChange signal of the input field.
      *
