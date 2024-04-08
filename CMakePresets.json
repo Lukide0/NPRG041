@@ -23,7 +23,7 @@
             },
             "errors": {
                 "dev": true,
-                "deprecated": true
+                "deprecated": false
             }
         },
         {
