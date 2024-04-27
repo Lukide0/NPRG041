@@ -12,7 +12,7 @@
 #include <vector>
 namespace koterm::dom {
 
-constexpr event::KeyCode LOOSE_FOCUS_KEY = event::KeyCode::F10;
+constexpr event::KeyCode LOOSE_FOCUS_KEY = event::KeyCode::ESC;
 constexpr event::KeyCode FOCUS_NEXT_KEY  = event::KeyCode::PAGE_DOWN;
 constexpr event::KeyCode FOCUS_PREV_KEY  = event::KeyCode::PAGE_UP;
 

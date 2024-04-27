@@ -3,10 +3,12 @@
 #include "koterm/event/Event.h"
 #include "koterm/event/EventListener.h"
 #include "koterm/event/EventSender.h"
+#include "koterm/event/KeyCodes.h"
+#include "koterm/terminal/Cursor.h"
 #include "koterm/terminal/Parser.h"
 #include "koterm/terminal/terminal.h"
-#include "koterm/terminal/Cursor.h"
 #include "koterm/unit.h"
+#include "koterm/util/ascii.h"
 #include "koterm/util/os.h"
 #include <algorithm>
 #include <array>
@@ -226,7 +228,14 @@ void event_emiter(event::EventListener<event::Event>* listener, std::atomic<bool
                 continue;
             }
 
-            parse_bytes(std::span<std::uint8_t> { buffer.data(), static_cast<std::size_t>(bytes) }, parser, sender);
+            std::span<std::uint8_t> bytes_data { buffer.data(), static_cast<std::size_t>(bytes) };
+
+            if (bytes_data.size() == 1 && bytes_data[0] == util::ascii::ESC && parser.empty()) {
+                sender.send(Event::create_key(event::KeyCode::ESC));
+            } else {
+                parse_bytes(std::span<std::uint8_t> { buffer.data(), static_cast<std::size_t>(bytes) }, parser, sender);
+            }
+
         } else {
             Dimensions new_dims = terminal::dimensions();
             if (new_dims != dims) {
@@ -285,16 +294,22 @@ void event_emiter(event::EventListener<event::Event>* listener, std::atomic<bool
 
                 character_bytes.resize(4);
                 int size = WideCharToMultiByte(
-                    CP_UTF8, 0, &key.uChar.UnicodeChar, 1, reinterpret_cast<char*>(character_bytes.data()), 4, nullptr, nullptr
+                    CP_UTF8,
+                    0,
+                    &key.uChar.UnicodeChar,
+                    1,
+                    reinterpret_cast<char*>(character_bytes.data()),
+                    4,
+                    nullptr,
+                    nullptr
                 );
 
                 character_bytes.resize(size);
-                if (size == 1 && character_bytes.front() == '\r')
-                {
+                if (size == 1 && character_bytes.front() == '\r') {
                     character_bytes[0] = '\n';
                 }
 
-                std::span<std::uint8_t> buffer {character_bytes };
+                std::span<std::uint8_t> buffer { character_bytes };
 
                 parse_bytes(buffer, parser, sender);
                 break;

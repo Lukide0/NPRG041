@@ -258,8 +258,8 @@ template <typename T> void Radiobox<T>::prepare_buffer() {
         }
 
         BoundingBox text_box = box;
-        text_box.top         = i;
-        text_box.bottom      = i;
+        text_box.top += i;
+        text_box.bottom = text_box.bottom;
 
         text_span.resize(text_box);
         m_options[i].label.render(text_span, pallete.foreground, pallete.background);

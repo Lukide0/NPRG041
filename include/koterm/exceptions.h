@@ -32,6 +32,11 @@ public:
     using KotermException::KotermException;
 };
 
+class InvalidElementException : public KotermException {
+public:
+    using KotermException::KotermException;
+};
+
 }
 
 #endif

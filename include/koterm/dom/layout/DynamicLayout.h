@@ -40,11 +40,15 @@ public:
      */
     virtual void update_layout() = 0;
 
+    void request_layout_update() { m_need_layout_update = true; }
+    [[nodiscard]] bool needs_layout_update() const { return m_need_layout_update; }
+
 protected:
     using Element::Element;
 
     element_container_t m_elements;
-    std::size_t m_focus = 0;
+    std::size_t m_focus       = 0;
+    bool m_need_layout_update = false;
 
 private:
     void prepare_buffer() override;

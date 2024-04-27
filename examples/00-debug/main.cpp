@@ -129,6 +129,11 @@ int main() {
             continue;
         }
 
+        if (bytes.size() == 1 && bytes[0] == koterm::util::ascii::ESC) {
+            print_event_key(koterm::event::KeyCode::ESC);
+            continue;
+        }
+
         for (auto&& byte : bytes) {
             auto state = parser.parse(byte);
 
@@ -213,125 +218,79 @@ void print_event_mouse(const terminal::Parser::MouseEvent& event) {
 void print_event_key(event::KeyCode key) {
     switch (key) {
     case koterm::event::KeyCode::ARROW_UP:
-        std::cout << "KEY["
-                  << "ARROW_UP"
-                  << "]\n";
+        std::cout << "KEY[ARROW_UP]\n";
         break;
     case koterm::event::KeyCode::ARROW_DOWN:
-        std::cout << "KEY["
-                  << "ARROW_DOWN"
-                  << "]\n";
+        std::cout << "KEY[ARROW_DOWN]\n";
         break;
     case koterm::event::KeyCode::ARROW_LEFT:
-        std::cout << "KEY["
-                  << "ARROW_LEFT"
-                  << "]\n";
+        std::cout << "KEY[ARROW_LEFT]\n";
         break;
     case koterm::event::KeyCode::ARROW_RIGHT:
-        std::cout << "KEY["
-                  << "ARROW_RIGHT"
-                  << "]\n";
+        std::cout << "KEY[ARROW_RIGHT]\n";
         break;
     case koterm::event::KeyCode::F1:
-        std::cout << "KEY["
-                  << "F1"
-                  << "]\n";
+        std::cout << "KEY[F1]\n";
         break;
     case koterm::event::KeyCode::F2:
-        std::cout << "KEY["
-                  << "F2"
-                  << "]\n";
+        std::cout << "KEY[F2]\n";
         break;
     case koterm::event::KeyCode::F3:
-        std::cout << "KEY["
-                  << "F3"
-                  << "]\n";
+        std::cout << "KEY[F3]\n";
         break;
     case koterm::event::KeyCode::F4:
-        std::cout << "KEY["
-                  << "F4"
-                  << "]\n";
+        std::cout << "KEY[F4]\n";
         break;
     case koterm::event::KeyCode::F5:
-        std::cout << "KEY["
-                  << "F5"
-                  << "]\n";
+        std::cout << "KEY[F5]\n";
         break;
     case koterm::event::KeyCode::F6:
-        std::cout << "KEY["
-                  << "F6"
-                  << "]\n";
+        std::cout << "KEY[F6]\n";
         break;
     case koterm::event::KeyCode::F7:
-        std::cout << "KEY["
-                  << "F7"
-                  << "]\n";
+        std::cout << "KEY[F7]\n";
         break;
     case koterm::event::KeyCode::F8:
-        std::cout << "KEY["
-                  << "F8"
-                  << "]\n";
+        std::cout << "KEY[F8]\n";
         break;
     case koterm::event::KeyCode::F9:
-        std::cout << "KEY["
-                  << "F9"
-                  << "]\n";
+        std::cout << "KEY[F9]\n";
         break;
     case koterm::event::KeyCode::F10:
-        std::cout << "KEY["
-                  << "F10"
-                  << "]\n";
+        std::cout << "KEY[F10]\n";
         break;
     case koterm::event::KeyCode::F11:
-        std::cout << "KEY["
-                  << "F11"
-                  << "]\n";
+        std::cout << "KEY[F11]\n";
         break;
     case koterm::event::KeyCode::F12:
-        std::cout << "KEY["
-                  << "F12"
-                  << "]\n";
+        std::cout << "KEY[F12]\n";
         break;
     case koterm::event::KeyCode::INSERT:
-        std::cout << "KEY["
-                  << "INSERT"
-                  << "]\n";
+        std::cout << "KEY[INSERT]\n";
         break;
     case koterm::event::KeyCode::DEL:
-        std::cout << "KEY["
-                  << "DELETE"
-                  << "]\n";
+        std::cout << "KEY[DELETE]\n";
         break;
     case koterm::event::KeyCode::HOME:
-        std::cout << "KEY["
-                  << "HOME"
-                  << "]\n";
+        std::cout << "KEY[HOME]\n";
         break;
     case koterm::event::KeyCode::END:
-        std::cout << "KEY["
-                  << "END"
-                  << "]\n";
+        std::cout << "KEY[END]\n";
         break;
     case koterm::event::KeyCode::PAGE_UP:
-        std::cout << "KEY["
-                  << "PAGE_UP"
-                  << "]\n";
+        std::cout << "KEY[PAGE_UP]\n";
         break;
     case koterm::event::KeyCode::PAGE_DOWN:
-        std::cout << "KEY["
-                  << "PAGE_DOWN"
-                  << "]\n";
+        std::cout << "KEY[PAGE_DOWN]\n";
         break;
     case koterm::event::KeyCode::BACKSPACE:
-        std::cout << "KEY["
-                  << "BACKSPACE"
-                  << "]\n";
+        std::cout << "KEY[BACKSPACE]\n";
         break;
     case koterm::event::KeyCode::ENTER:
-        std::cout << "KEY["
-                  << "ENTER"
-                  << "]\n";
+        std::cout << "KEY[ENTER]\n";
         break;
+    case koterm::event::KeyCode::ESC:
+        std::cout << "KEY[ESC]\n";
     }
 }
 

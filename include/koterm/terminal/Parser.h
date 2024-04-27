@@ -117,6 +117,8 @@ public:
      */
     void clear() { m_buffer.clear(); }
 
+    [[nodiscard]] bool empty() const { return m_buffer.empty(); }
+
 private:
     /**
      * @brief Converts a byte span(utf-8) to a value.

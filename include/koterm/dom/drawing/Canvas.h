@@ -124,6 +124,14 @@ public:
      */
     Canvas& line(point_t start, point_t end, color_t color);
 
+    /*
+     * @bried Draws a point
+     *
+     * @param p The point coord
+     * @param color The color of the point
+     */
+    Canvas& dot(point_t p, color_t color);
+
     void calculate_requirements() override {
         m_info.min_width  = m_view.width * 2;
         m_info.min_height = m_view.height;

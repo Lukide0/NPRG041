@@ -26,6 +26,7 @@ enum class KeyCode : std::uint8_t {
     F11,
     F12,
 
+    ESC,
     INSERT,
     DEL,
     HOME,

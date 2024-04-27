@@ -145,8 +145,7 @@ bool init(Features features = FeatureFlags::NONE) {
     DWORD mode_out = 0;
     DWORD mode_in  = 0;
 
-    if (SetConsoleOutputCP(CP_UTF8) == false)
-    {
+    if (SetConsoleOutputCP(CP_UTF8) == false) {
         g_terminfo->exit();
         g_terminfo->error = "failed to set UTF-8 code page";
         return false;
@@ -200,7 +199,6 @@ bool init(Features features = FeatureFlags::NONE) {
         enable_feature(ansi::Features::EXT_MODE_MOUSE);
         // SGR mode
         enable_feature(ansi::Features::SGR_EXT_MODE_MOUSE);
-
     }
 
 #ifdef OS_LINUX
