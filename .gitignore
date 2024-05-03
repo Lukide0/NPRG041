@@ -1,7 +1,7 @@
 .cache/
 .vs
 .vscode
-docs/
+docs/doxygen
 
 # Prerequisites
 *.d
