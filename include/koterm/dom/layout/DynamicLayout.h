@@ -43,6 +43,13 @@ public:
     void request_layout_update() { m_need_layout_update = true; }
     [[nodiscard]] bool needs_layout_update() const { return m_need_layout_update; }
 
+    bool handle_change_box(const BoundingBox& box) override {
+        m_buffer.resize(box);
+        request_update();
+        request_layout_update();
+        return true;
+    }
+
 protected:
     using Element::Element;
 
