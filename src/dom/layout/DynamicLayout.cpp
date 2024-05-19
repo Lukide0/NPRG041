@@ -70,6 +70,7 @@ void DynamicLayout::remove_child(element_ref child) {
 }
 
 void DynamicLayout::prepare_buffer() {
+    m_buffer.clear();
 
     if (m_need_layout_update) {
         m_need_layout_update = false;
