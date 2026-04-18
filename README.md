@@ -40,15 +40,15 @@ FetchContent_MakeAvailable(koterm_repo)
 
 ### Elements
 
-- Text [example](examples/elements/text/main.cpp)
-- Canvas [example](examples/elements/canvas/main.cpp)
-- Button [example](examples/elements/button/main.cpp)
-- Checkbox [example](examples/elements/checkbox/main.cpp)
-- Toggle [example](examples/elements/toggle/main.cpp)
-- Input [example](examples/elements/input/main.cpp)
-- Slider [example](examples/elements/slider/main.cpp)
-- Radiobox [example](examples/elements/radiobox/main.cpp)
-- VBox, HBox [example](examples/elements/boxes/main.cpp)
+- Text
+- Canvas
+- Button
+- Checkbox
+- Toggle
+- Input
+- Slider
+- Radiobox
+- VBox, HBox
 
 ### Components
 
