@@ -1,7 +1,5 @@
 # Koterm
 
-![Language](https://img.shields.io/badge/language-C%2B%2B-blue.svg)
-
 Koterm is a C++ library for creating static user interfaces (UI) in terminal environments.
 
 ## Features
