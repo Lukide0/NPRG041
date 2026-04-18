@@ -16,6 +16,8 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@v4
+              with:
+                  submodules: recursive
 
             - name: Install Doxygen
               run: sudo apt-get update && sudo apt-get install -y doxygen graphviz
@@ -31,9 +33,12 @@ jobs:
     deploy:
         needs: build
         runs-on: ubuntu-latest
+
         environment:
             name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
 
         steps:
             - name: Deploy
+              id: deployment
               uses: actions/deploy-pages@v4
