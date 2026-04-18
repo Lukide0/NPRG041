@@ -1,7 +1,6 @@
 # Koterm
 
-[![Pipeline Status](https://gitlab.mff.cuni.cz/teaching/nprg041/2023-24/svoboda-1040/koliandl/badges/master/pipeline.svg)](https://gitlab.mff.cuni.cz/teaching/nprg041/2023-24/svoboda-1040/koliandl/-/pipelines)
-[![Language](https://img.shields.io/badge/language-C%2B%2B-blue.svg)]()
+![Language](https://img.shields.io/badge/language-C%2B%2B-blue.svg)
 
 Koterm is a C++ library for creating static user interfaces (UI) in terminal environments.
 
@@ -22,13 +21,11 @@ find_package(Git REQUIRED)
 
 FetchContent_Declare(
     koterm_repo
-    GIT_REPOSITORY git@gitlab.mff.cuni.cz:teaching/nprg041/2023-24/svoboda-1040/koliandl.git
+    GIT_REPOSITORY https://github.com/Lukide0/NPRG041.git
     GIT_SHALLOW TRUE
     GIT_PROGRESS ON
 )
 FetchContent_MakeAvailable(koterm_repo)
-
-add_subdirectory(${koterm_repo_SOURCE_DIR}/project)
 
 # add_executable(my_app ...)
 # target_compile_features(my_app PRIVATE cxx_std_20)
@@ -131,7 +128,3 @@ private:
   using Element::Element;
 };
 ```
-
-##### Developer documentation
-
-- [documentation](./docs/devel.md)

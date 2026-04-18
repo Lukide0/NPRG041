@@ -1,9 +1,11 @@
 # Project information
 PROJECT_NAME = "koterm"
+PROJECT_NUMBER = "1.0"
+PROJECT_BRIEF = "Koterm is a C++ library for creating static user interfaces (UI) in terminal environments."
 
 # Source directories
 RECURSIVE = YES
-INPUT = ./include/koterm
+INPUT = ./include/koterm ./src README.md
 
 # Output directory
 OUTPUT_DIRECTORY = ./docs/doxygen
@@ -13,6 +15,9 @@ OUTPUT_LANGUAGE = English
 
 # Settings
 DOXYFILE_ENCODING = UTF-8
+
+JAVADOC_AUTOBRIEF = YES
+MULTILINE_CPP_IS_BRIEF = YES
 
 EXTRACT_ALL = YES
 EXTRACT_PRIVATE = YES
@@ -25,6 +30,18 @@ ENABLE_PREPROCESSING = YES
 MACRO_EXPANSION = YES
 EXPAND_ONLY_PREDEF = YES
 PREDEFINED = "DEFINE_SYS_COLOR(name, id)=static constexpr auto SYS_##name = Color::from_code(id)"
+
+GENERATE_LATEX = NO
+
+MARKDOWN_SUPPORT = YES
+USE_MDFILE_AS_MAINPAGE = README.md
+
+# Diagrams
+HAVE_DOT = YES
+CALL_GRAPH = YES
+CALLER_GRAPH = YES
+CLASS_DIAGRAMS = YES
+UML_LOOK = YES
 
 # Style
 GENERATE_TREEVIEW = YES
